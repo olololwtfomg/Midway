@@ -6,25 +6,43 @@ import java.util.Random;
 
 
 public class Jenny {
+	
+
+	private enum OS_type {
+		WINDOWS,LINUX 
+	}
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		ActualStatus status = loadStatus();
+		ActualStatus status = loadStatus(OS_type.LINUX);
 		Sector temp = selectRandom(status);
 		System.out.println("Nahodna pozicia: [" + temp.xPos + ","+ temp.yPos + "] " + temp.ship + temp.bomb);
 
 	}
 
-	private static ActualStatus loadStatus() {
+	private static ActualStatus loadStatus(OS_type os_type) {
 		BufferedReader br = null;
 		ActualStatus status = new ActualStatus();
 		String currentLine = "";
+		String logFileName;
+		switch(os_type)
+		{
+			case WINDOWS:
+				logFileName=".\\src\\battlefield.txt";
+				break;
+			case LINUX:
+				logFileName="./src/battlefield.txt";
+				break;
+			default:
+				logFileName="./src/battlefield.txt";	
+				break;
+		}
 		int index = 0;
 		String[] splitLine;
 		try {	//nacitanie zo suboru
-			File file = new File(".\\src\\battlefield.txt");
+			File file = new File(logFileName);
 			br = new BufferedReader(new FileReader(file));
 			currentLine = br.readLine();
 			if (currentLine != null) {  //status line
