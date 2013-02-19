@@ -108,12 +108,25 @@ public class Jenny {
 		switch (charAt) {
 		case 49:  //one
 			condition = 1; break;  //ally ship, floating
+		case 50:  //two
+			condition = 2; break;  //enemy ship = max priority
+		case 51:  //three          //bad logic sector in log
+		case 46:  //dot
+			condition = 3; break;  //nothing, hit
+		case 52:  //four
+			condition = 4; break;  //our shot on nothing  /extends 3
+		case 53:  //five
+			condition = 5; break;  //enemy shot on nothing  /extends 3
+		case 54:  //six
 		case 42:  //star
 			condition = 6; break;  //ally ship, sunk
+		case 55:  //seven
 		case 43:  //plus
 			condition = 7; break;  //enemy ship, sunk
-		case 46:  //dot
-			condition = 3; break; //nothing, hit
+		case 56:  //eight
+			condition = 8; break;  //probably blank sector
+		case 57:  //nine
+			condition = 9; break;  //next round shot
 		case 32:  //space
 			condition = 0; break;  //unknown
 		}
