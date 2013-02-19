@@ -93,7 +93,7 @@ public class Jenny {
 		//Dont use ascii values for char
 		switch (charAt) {
 		case '1':  //one
-			ship = 2; bomb = 1; break;  //own ship, dont shoot
+			ship = 2; bomb = 1; break; //own ship, dont shoot
 		case '*':  //star
 			ship = 2; bomb = 2; break;  //own ship, sunk
 		case '+':  //plus
@@ -101,6 +101,9 @@ public class Jenny {
 		case '.':  //dot
 			ship = 1; bomb = 2; break; //nothing, hit
 		case ' ':  //space
+			ship = 0; bomb = 0; break;  //unknown
+		default:
+			//although this shouldn't happen don't forget about it
 			ship = 0; bomb = 0; break;  //unknown
 		}
 		return new Sector(ship,bomb);
