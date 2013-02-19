@@ -20,7 +20,8 @@ public class Jenny {
 	public static void main(String[] args) {
 		ActualStatus status = loadStatus();
 		Sector temp = selectRandom(status);
-		System.out.println("Nahodna pozicia: [" + temp.xPos + ","+ temp.yPos + "] " + temp.ship + temp.bomb);
+		System.out.println(status.battlefield[0][1].condition);
+		System.out.println("Nahodna pozicia: [" + temp.xPos + ","+ temp.yPos + "] " + temp.condition);
 
 	}
 
@@ -45,6 +46,12 @@ public class Jenny {
 		String[] splitLine;
 		try {	//nacitanie zo suboru
 			File file = new File(logFileName);
+			if (!file.isFile()) {
+				return null;
+				////////////////////////////////////////////////
+				////////////load status from log
+				////////////////////////////////////////////////				
+			}
 			br = new BufferedReader(new FileReader(file));
 			currentLine = br.readLine();
 			if (currentLine != null) {  //status line
@@ -56,8 +63,7 @@ public class Jenny {
 			while ((currentLine = br.readLine()) != null) {
 				if (index<15 || currentLine.length() ==14) {
 					for (int column = 0; column<currentLine.length(); column++) {
-						status.battlefield[index][column] = parseSector(currentLine.charAt(column));
-						status.battlefield[index][column].setPosition(index, column);
+						status.battlefield[index][column] = new Sector(parseStatus(currentLine.charAt(column)) , index, column);
 					}
 					index++;
 				} else {
@@ -86,24 +92,45 @@ public class Jenny {
 		}
 		return status;
 	}
-
-	private static Sector parseSector(char charAt) {
-		int ship = 0; //0 for unknown, 1 for clear, 2 for self, 3 for enemy
-		int bomb = 0; //0 for unexplored, 1 for blend, 2 for hit, 3 for self hit, 4 for enemy hit
-		//Dont use ascii values for char
+	
+	private static int parseStatus(String str) {
+		return parseStatus(str.charAt(0));
+	}
+	
+	private static int parseStatus(char charAt) {
+		int condition = 0;
+		
+		//1 for own ship, 2 for enemy ship
+		//3 for unknown shot, 4 for own shot, 5 for enemy shot
+		//6 for ally ship hit, 7 for enemy ship hit,
+		//8 for lowest priority, 9 for high priority, 0 for unknown
+		
 		switch (charAt) {
-		case '1':  //one
-			ship = 2; bomb = 1; break;  //own ship, dont shoot
-		case '*':  //star
-			ship = 2; bomb = 2; break;  //own ship, sunk
-		case '+':  //plus
-			ship = 3; bomb = 2; break;  //enemy ship, sunk
-		case '.':  //dot
-			ship = 1; bomb = 2; break; //nothing, hit
-		case ' ':  //space
-			ship = 0; bomb = 0; break;  //unknown
+		case 49:  //one
+			condition = 1; break;  //ally ship, floating
+		case 50:  //two
+			condition = 2; break;  //enemy ship = max priority
+		case 51:  //three          //bad logic sector in log
+		case 46:  //dot
+			condition = 3; break;  //nothing, hit
+		case 52:  //four
+			condition = 4; break;  //our shot on nothing  /extends 3
+		case 53:  //five
+			condition = 5; break;  //enemy shot on nothing  /extends 3
+		case 54:  //six
+		case 42:  //star
+			condition = 6; break;  //ally ship, sunk
+		case 55:  //seven
+		case 43:  //plus
+			condition = 7; break;  //enemy ship, sunk
+		case 56:  //eight
+			condition = 8; break;  //probably blank sector
+		case 57:  //nine
+			condition = 9; break;  //next round shot
+		case 32:  //space
+			condition = 0; break;  //unknown
 		}
-		return new Sector(ship,bomb);
+		return condition;
 	}
 
 	private static Sector selectRandom(ActualStatus status) {
