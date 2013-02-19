@@ -20,6 +20,7 @@ public class Jenny {
 	public static void main(String[] args) {
 		ActualStatus status = loadStatus();
 		Sector temp = selectRandom(status);
+		System.out.println(status.battlefield[0][1].condition);
 		System.out.println("Nahodna pozicia: [" + temp.xPos + ","+ temp.yPos + "] " + temp.condition);
 
 	}
@@ -62,8 +63,7 @@ public class Jenny {
 			while ((currentLine = br.readLine()) != null) {
 				if (index<15 || currentLine.length() ==14) {
 					for (int column = 0; column<currentLine.length(); column++) {
-						status.battlefield[index][column] = parseSector(currentLine.charAt(column));
-						status.battlefield[index][column].setPosition(index, column);
+						status.battlefield[index][column] = new Sector(parseStatus(currentLine.charAt(column)) , index, column);
 					}
 					index++;
 				} else {
@@ -92,27 +92,32 @@ public class Jenny {
 		}
 		return status;
 	}
-
-	private static Sector parseSector(char charAt) {
+	
+	private static int parseStatus(String str) {
+		return parseStatus(str.charAt(0));
+	}
+	
+	private static int parseStatus(char charAt) {
 		int condition = 0;
 		
-		//0 for unknown, 1 for own ship, 2 for enemy ship
-		//3 for shot, 4 for own ship hit, 5 for enemy ship hit
-		//6 for high priority
+		//1 for own ship, 2 for enemy ship
+		//3 for unknown shot, 4 for own shot, 5 for enemy shot
+		//6 for ally ship hit, 7 for enemy ship hit,
+		//8 for lowest priority, 9 for high priority, 0 for unknown
 		
 		switch (charAt) {
 		case 49:  //one
-			condition = 1; break;  //own ship, floating
+			condition = 1; break;  //ally ship, floating
 		case 42:  //star
-			condition = 4; break;  //own ship, sunk
+			condition = 6; break;  //ally ship, sunk
 		case 43:  //plus
-			condition = 5; break;  //enemy ship, sunk
+			condition = 7; break;  //enemy ship, sunk
 		case 46:  //dot
 			condition = 3; break; //nothing, hit
 		case 32:  //space
 			condition = 0; break;  //unknown
 		}
-		return new Sector(condition);
+		return condition;
 	}
 
 	private static Sector selectRandom(ActualStatus status) {

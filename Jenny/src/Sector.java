@@ -6,8 +6,13 @@ public class Sector {
 	boolean highPriority = false;
 	public Sector(int condition) {
 		this.condition = condition;
-
 	}
+	public Sector(int condition, int x, int y) {
+		this.condition = condition;
+		this.xPos = x;
+		this.yPos = y;
+	}
+
 	public void setPosition(int x, int y) {
 		this.xPos = x;
 		this.yPos = y;
