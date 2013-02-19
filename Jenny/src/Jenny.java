@@ -45,6 +45,12 @@ public class Jenny {
 		String[] splitLine;
 		try {	//nacitanie zo suboru
 			File file = new File(logFileName);
+			if (!file.isFile()) {
+				return null;
+				////////////////////////////////////////////////
+				////////////load status from log
+				////////////////////////////////////////////////				
+			}
 			br = new BufferedReader(new FileReader(file));
 			currentLine = br.readLine();
 			if (currentLine != null) {  //status line
