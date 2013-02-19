@@ -1,10 +1,13 @@
+//import Sector.SectorConsts;
+
 
 public class ActualStatus {
 	
 	interface StatusConsts{
 		public static final int SECTOR_SIZE=14;
 		public static final int HEUR_OFFSET=2;
-		public static final int HEUR_THRESHOLD=150;
+		// TODO: toto prepisat tak aby to importovalo konstantu zo Sector 
+		public static final int HEUR_THRESHOLD=100;
 	}
 	public int side=0;
 	public int roundsToEnd = 0;
@@ -15,14 +18,14 @@ public class ActualStatus {
 	
 	public void calculateHeuristics()
 	{
-		int value;
 		for(int xAxis=StatusConsts.HEUR_OFFSET;
 				xAxis<(StatusConsts.SECTOR_SIZE-StatusConsts.HEUR_OFFSET);
 				xAxis++){
 			for(int yAxis=StatusConsts.HEUR_OFFSET;
 					yAxis<(StatusConsts.SECTOR_SIZE-StatusConsts.HEUR_OFFSET);
 					yAxis++){
-				
+				battlefield[xAxis][yAxis].setHeurValue(
+						calculateSectorHeuristics(xAxis,yAxis));
 			}
 		}
 	}
@@ -30,7 +33,19 @@ public class ActualStatus {
 	private int calculateSectorHeuristics(int x, int y)
 	{
 		int value=0;
-		//for(int i)
+		for(int xAxis=(x-StatusConsts.HEUR_OFFSET);
+				xAxis<(x+StatusConsts.HEUR_OFFSET);
+				xAxis++){
+			for(int yAxis=y-StatusConsts.HEUR_OFFSET;
+					yAxis<(y+StatusConsts.HEUR_OFFSET);
+					yAxis++){
+				if(value>StatusConsts.HEUR_THRESHOLD)
+				{
+					return value;
+				}
+				value+=battlefield[xAxis][yAxis].getSpecialValue();
+			}
+		}
 		return value;
 	}
 
