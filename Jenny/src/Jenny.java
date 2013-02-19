@@ -20,7 +20,7 @@ public class Jenny {
 	public static void main(String[] args) {
 		ActualStatus status = loadStatus();
 		Sector temp = selectRandom(status);
-		System.out.println("Nahodna pozicia: [" + temp.xPos + ","+ temp.yPos + "] " + temp.ship + temp.bomb);
+		System.out.println("Nahodna pozicia: [" + temp.xPos + ","+ temp.yPos + "] " + temp.condition);
 
 	}
 
@@ -94,21 +94,25 @@ public class Jenny {
 	}
 
 	private static Sector parseSector(char charAt) {
-		int ship = 0; //0 for unknown, 1 for clear, 2 for self, 3 for enemy
-		int bomb = 0; //0 for unexplored, 1 for blend, 2 for hit, 3 for self hit, 4 for enemy hit
+		int condition = 0;
+		
+		//0 for unknown, 1 for own ship, 2 for enemy ship
+		//3 for shot, 4 for own ship hit, 5 for enemy ship hit
+		//6 for high priority
+		
 		switch (charAt) {
 		case 49:  //one
-			ship = 2; bomb = 1; break;  //own ship, dont shoot
+			condition = 1; break;  //own ship, floating
 		case 42:  //star
-			ship = 2; bomb = 2; break;  //own ship, sunk
+			condition = 4; break;  //own ship, sunk
 		case 43:  //plus
-			ship = 3; bomb = 2; break;  //enemy ship, sunk
+			condition = 5; break;  //enemy ship, sunk
 		case 46:  //dot
-			ship = 1; bomb = 2; break; //nothing, hit
+			condition = 3; break; //nothing, hit
 		case 32:  //space
-			ship = 0; bomb = 0; break;  //unknown
+			condition = 0; break;  //unknown
 		}
-		return new Sector(ship,bomb);
+		return new Sector(condition);
 	}
 
 	private static Sector selectRandom(ActualStatus status) {
