@@ -11,23 +11,25 @@ public class Jenny {
 	private enum OS_type {
 		WINDOWS,LINUX 
 	}
+	
+	private static OS_type os_type=OS_type.LINUX;
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		ActualStatus status = loadStatus(OS_type.LINUX);
+		ActualStatus status = loadStatus();
 		Sector temp = selectRandom(status);
 		System.out.println("Nahodna pozicia: [" + temp.xPos + ","+ temp.yPos + "] " + temp.ship + temp.bomb);
 
 	}
 
-	private static ActualStatus loadStatus(OS_type os_type) {
+	private static ActualStatus loadStatus() {
 		BufferedReader br = null;
 		ActualStatus status = new ActualStatus();
 		String currentLine = "";
 		String logFileName;
-		switch(os_type)
+		switch(Jenny.os_type)
 		{
 			case WINDOWS:
 				logFileName=".\\src\\battlefield.txt";
