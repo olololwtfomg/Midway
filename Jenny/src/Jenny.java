@@ -90,16 +90,17 @@ public class Jenny {
 	private static Sector parseSector(char charAt) {
 		int ship = 0; //0 for unknown, 1 for clear, 2 for self, 3 for enemy
 		int bomb = 0; //0 for unexplored, 1 for blend, 2 for hit, 3 for self hit, 4 for enemy hit
+		//Dont use ascii values for char
 		switch (charAt) {
-		case 49:  //one
+		case '1':  //one
 			ship = 2; bomb = 1; break;  //own ship, dont shoot
-		case 42:  //star
+		case '*':  //star
 			ship = 2; bomb = 2; break;  //own ship, sunk
-		case 43:  //plus
+		case '+':  //plus
 			ship = 3; bomb = 2; break;  //enemy ship, sunk
-		case 46:  //dot
+		case '.':  //dot
 			ship = 1; bomb = 2; break; //nothing, hit
-		case 32:  //space
+		case ' ':  //space
 			ship = 0; bomb = 0; break;  //unknown
 		}
 		return new Sector(ship,bomb);
