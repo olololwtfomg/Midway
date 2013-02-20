@@ -153,15 +153,17 @@ public class Jenny {
 	
 	private static void makeNearestBlank(Sector sector) {
 		int x = sector.xPos, y = sector.yPos;
-		Sector temp;
-		int[] nearest = { x-1, y, x, y+1, x+1, y, x, y-1}; 
-		for (int i = 0; i<4; i++) {
-			x = nearest[i];
-			y = nearest[i+1];
+		Sector temp;  //        north      east       south      west      northeast   southeast     southwest    northwest
+		int[][] nearest = { { x-1, y }, { x,y+1 }, { x+1,y }, { x,y-1 }, { x-1,y+1 }, { x+1, y+1 }, { x+1, y-1 }, {x-1, y-1} }; 
+		for (int i = 0; i<nearest.length; i++) {
+			x = nearest[i][0];
+			y = nearest[i][1];
 			if (x<14 && y<14 && x>=0 && y>=0) {
 				temp = status.battlefield[x][y];
 				switch (temp.condition) {
-				case 0:	case 9:	case 8:	case 2: temp.condition = 8; break;
+				case ConditionConstants.UNKNOWN:
+				case ConditionConstants.ENEMY_SHIP:
+				case ConditionConstants.NEXT_ROUND_SHOT: temp.condition = ConditionConstants.PROBABLY_BLANK; break;
 				}
 			}
 		}
