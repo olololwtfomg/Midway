@@ -30,11 +30,26 @@ public class ActualStatus {
 					currSector.setHeurValue(
 							calculateSectorHeuristics(xAxis,yAxis));
 				}
+				battlefield[xAxis][yAxis]=currSector;
 			}
 		}
 	}
+	
+	public void print_heuristics()
+	{
+		for(int xAxis=StatusConsts.HEUR_OFFSET;
+				xAxis<(StatusConsts.SECTOR_SIZE-StatusConsts.HEUR_OFFSET);
+				xAxis++){
+			for(int yAxis=StatusConsts.HEUR_OFFSET;
+					yAxis<(StatusConsts.SECTOR_SIZE-StatusConsts.HEUR_OFFSET);
+					yAxis++){
+				System.out.print(battlefield[xAxis][yAxis].getHeurValue());
+			}
+			System.out.println();
+		}
+	}
     
-	public int calculateSectorHeuristics(int x, int y)
+	private int calculateSectorHeuristics(int x, int y)
 	{
 		int value;
 		int retval=0;

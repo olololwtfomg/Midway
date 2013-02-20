@@ -22,8 +22,8 @@ public class Jenny {
 		loadLog(status);
 		Sector temp = selectRandom(status);
 		System.out.println(status.battlefield[0][1].condition);
-		int heurTemp=status.calculateSectorHeuristics(1, 1);
-		System.out.println(" Heuristicka hodnota" + heurTemp);
+		status.calculateHeuristics();
+		status.print_heuristics();
 		System.out.println("Nahodna pozicia: [" + temp.xPos + ","+ temp.yPos + "] " + temp.condition);
 		
 
