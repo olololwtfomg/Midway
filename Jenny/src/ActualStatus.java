@@ -14,6 +14,33 @@ public class ActualStatus {
 			new Sector[StatusConsts.SECTOR_SIZE][StatusConsts.SECTOR_SIZE];
 	
 	//TODO: otestovat
+	
+	public int[] findAirstrikePos(){
+		int PosBest[]= {15,15};
+		int best=StatusConsts.HEUR_THRESHOLD+1;
+		int currHeurValue;
+		
+		for(int xAxis=StatusConsts.HEUR_OFFSET;
+				xAxis<(StatusConsts.SECTOR_SIZE-StatusConsts.HEUR_OFFSET);
+				xAxis++){
+			for(int yAxis=StatusConsts.HEUR_OFFSET;
+					yAxis<(StatusConsts.SECTOR_SIZE-StatusConsts.HEUR_OFFSET);
+					yAxis++){
+				currHeurValue=battlefield[xAxis][yAxis].getHeurValue();
+				if(currHeurValue<=StatusConsts.HEUR_THRESHOLD)
+				{
+					if(currHeurValue<best)
+					{
+						PosBest[0]=xAxis;
+						PosBest[1]=yAxis;
+					}
+						
+				}
+			}
+			}
+		return PosBest;
+	}
+	
 	public void calculateHeuristics()
 	{
 		Sector currSector;
@@ -26,7 +53,7 @@ public class ActualStatus {
 				/*there's no point in calculating it over and over again
 				 * if we know it's a bad location to do an air strike*/
 				currSector=battlefield[xAxis][yAxis];
-				if(currSector.getHeurValue()>StatusConsts.HEUR_THRESHOLD){
+				if(currSector.getHeurValue()<StatusConsts.HEUR_THRESHOLD){
 					currSector.setHeurValue(
 							calculateSectorHeuristics(xAxis,yAxis));
 				}
@@ -43,7 +70,7 @@ public class ActualStatus {
 			for(int yAxis=StatusConsts.HEUR_OFFSET;
 					yAxis<(StatusConsts.SECTOR_SIZE-StatusConsts.HEUR_OFFSET);
 					yAxis++){
-				System.out.print(battlefield[xAxis][yAxis].getHeurValue());
+				System.out.printf("%4d",battlefield[xAxis][yAxis].getHeurValue());
 			}
 			System.out.println();
 		}
