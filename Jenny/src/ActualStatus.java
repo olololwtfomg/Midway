@@ -35,23 +35,31 @@ public class ActualStatus {
 	}
     
 	//TODO: otestovat
-	private int calculateSectorHeuristics(int x, int y)
+	public int calculateSectorHeuristics(int x, int y)
 	{
-		int value=0;
+		int value;
+		int retval=0;
 		for(int xAxis=(x-StatusConsts.HEUR_OFFSET);
 				xAxis<(x+StatusConsts.HEUR_OFFSET);
 				xAxis++){
 			for(int yAxis=y-StatusConsts.HEUR_OFFSET;
 					yAxis<(y+StatusConsts.HEUR_OFFSET);
 					yAxis++){
-				if(value>StatusConsts.HEUR_THRESHOLD)
+				if(retval>StatusConsts.HEUR_THRESHOLD)
 				{
-					return value;
+					return retval;
 				}
-				value+=battlefield[xAxis][yAxis].getSpecialValue();
+				try{
+					value=battlefield[xAxis][yAxis].getSpecialValue();
+				}
+				catch(ArrayIndexOutOfBoundsException ex)
+				{
+					value=100;
+				}
+				retval+=value;
 			}
 		}
-		return value;
+		return retval;
 	}
 
 }

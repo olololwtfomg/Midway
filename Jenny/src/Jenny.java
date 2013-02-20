@@ -11,7 +11,6 @@ public class Jenny {
 	private enum OS_type {
 		WINDOWS,LINUX 
 	}
-	
 
 	private static OS_type os_type=OS_type.LINUX;
 
@@ -23,7 +22,10 @@ public class Jenny {
 		loadLog(status);
 		Sector temp = selectRandom(status);
 		System.out.println(status.battlefield[0][1].condition);
+		int heurTemp=status.calculateSectorHeuristics(1, 1);
+		System.out.println(" Heuristicka hodnota" + heurTemp);
 		System.out.println("Nahodna pozicia: [" + temp.xPos + ","+ temp.yPos + "] " + temp.condition);
+		
 
 	}
 	private static void loadLog(ActualStatus status) { loadLog(status, false); }
@@ -257,7 +259,7 @@ public class Jenny {
 		Random rnd = new Random();
 		return status.battlefield[rnd.nextInt(status.battlefield.length)][rnd.nextInt(status.battlefield[0].length)];
 	}
-
+	
 	/*
 		for (int row = 0; row<status.battlefield.length;row++) {
 			for (int column = 0; column<status.battlefield[0].length;column++) {
