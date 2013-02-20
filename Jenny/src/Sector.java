@@ -1,10 +1,9 @@
 
-
 public class Sector {
+	
 	/*
 	 * TODO: hodnoty podla pravdepodobnostneho modelu
 	 * */
-	
 	public interface SectorConsts{
 		public static final int OWN_SHIP=100;
 		public static final int ENEMY_SHIP=0;
