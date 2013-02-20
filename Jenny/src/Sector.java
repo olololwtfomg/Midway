@@ -1,5 +1,4 @@
 
-
 public class Sector {
 	
 	/*
@@ -41,6 +40,10 @@ public class Sector {
 	public void setHeurValue(int value)
 	{
 		this.heurValue=value;
+	}
+	
+	public int getHeurValue(){
+		return this.heurValue;
 	}
 	public int getSpecialValue(){
 		int retval=0;

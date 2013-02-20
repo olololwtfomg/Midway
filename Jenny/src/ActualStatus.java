@@ -1,5 +1,3 @@
-//import Sector.SectorConsts;
-
 
 public class ActualStatus {
 	
@@ -15,21 +13,28 @@ public class ActualStatus {
 	public Sector[][] battlefield = 
 			new Sector[StatusConsts.SECTOR_SIZE][StatusConsts.SECTOR_SIZE];
 	
-	
+	//TODO: otestovat
 	public void calculateHeuristics()
 	{
+		Sector currSector;
 		for(int xAxis=StatusConsts.HEUR_OFFSET;
 				xAxis<(StatusConsts.SECTOR_SIZE-StatusConsts.HEUR_OFFSET);
 				xAxis++){
 			for(int yAxis=StatusConsts.HEUR_OFFSET;
 					yAxis<(StatusConsts.SECTOR_SIZE-StatusConsts.HEUR_OFFSET);
 					yAxis++){
-				battlefield[xAxis][yAxis].setHeurValue(
-						calculateSectorHeuristics(xAxis,yAxis));
+				/*there's no point in calculating it over and over again
+				 * if we know it's a bad location to do an air strike*/
+				currSector=battlefield[xAxis][yAxis];
+				if(currSector.getHeurValue()>StatusConsts.HEUR_THRESHOLD){
+					currSector.setHeurValue(
+							calculateSectorHeuristics(xAxis,yAxis));
+				}
 			}
 		}
 	}
-
+    
+	//TODO: otestovat
 	private int calculateSectorHeuristics(int x, int y)
 	{
 		int value=0;
