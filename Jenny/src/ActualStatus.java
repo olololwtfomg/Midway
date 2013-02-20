@@ -1,5 +1,3 @@
-//import Sector.SectorConsts;
-
 
 public class ActualStatus {
 	
@@ -35,6 +33,7 @@ public class ActualStatus {
 			}
 		}
 	}
+    
 	//TODO: otestovat
 	public int calculateSectorHeuristics(int x, int y)
 	{
