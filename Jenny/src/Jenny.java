@@ -4,6 +4,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Random;
 
+import usedConsts.ConditionConstants;
 
 public class Jenny {
 	static ActualStatus status;
@@ -22,10 +23,12 @@ public class Jenny {
 		loadLog(status);
 		Sector temp = selectRandom(status);
 		System.out.println(status.battlefield[0][1].condition);
+		/*
 		status.calculateHeuristics();
 		status.print_heuristics();
 		int position[]=status.findAirstrikePos();
 		System.out.println("launch airstrike on position x"+position[0]+"y"+position[1]);
+		*/
 		System.out.println("Nahodna pozicia: [" + temp.xPos + ","+ temp.yPos + "] " + temp.condition);
 		
 
@@ -242,28 +245,28 @@ public class Jenny {
 
 		switch (charAt) {
 		case '1':  //one
-			condition = 1; break;  //ally ship, floating
+			condition = ConditionConstants.ALLY_SHIP; break;  //ally ship, floating
 		case '2':  //two
-			condition = 2; break;  //enemy ship = max priority
+			condition = ConditionConstants.ENEMY_SHIP; break;  //enemy ship = max priority
 		case '3':  //three          //bad logic sector in log
 		case '.':  //dot
-			condition = 3; break;  //nothing, hit
+			condition = ConditionConstants.NOTHING_HIT; break;  //nothing, hit
 		case '4':  //four
-			condition = 4; break;  //our shot on nothing  /extends 3
+			condition = ConditionConstants.OUR_NOTHING; break;  //our shot on nothing  /extends 3
 		case '5':  //five
-			condition = 5; break;  //enemy shot on nothing  /extends 3
+			condition = ConditionConstants.ENEMY_NOTHING; break;  //enemy shot on nothing  /extends 3
 		case '6':  //six
 		case '*':  //star
-			condition = 6; break;  //ally ship, sunk
+			condition = ConditionConstants.ALLY_SUNK; break;  //ally ship, sunk
 		case '7':  //seven
 		case '+':  //plus
-			condition = 7; break;  //enemy ship, sunk
+			condition = ConditionConstants.ENEMY_SUNK; break;  //enemy ship, sunk
 		case '8':  //eight
-			condition = 8; break;  //probably blank sector
+			condition = ConditionConstants.PROBABLY_BLANK; break;  //probably blank sector
 		case '9':  //nine
-			condition = 9; break;  //next round shot
+			condition = ConditionConstants.NEXT_ROUND_SHOT; break;  //next round shot
 		case ' ':  //space
-			condition = 0; break;  //unknown
+			condition = ConditionConstants.UNKNOWN; break;  //unknown
 		}
 		return condition;
 	}

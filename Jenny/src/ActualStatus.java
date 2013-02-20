@@ -1,19 +1,12 @@
+import usedConsts.StatusConsts;
 
 public class ActualStatus {
 	
-	interface StatusConsts{
-		public static final int SECTOR_SIZE=14;
-		public static final int HEUR_OFFSET=2;
-		// TODO: toto prepisat tak aby to importovalo konstantu zo Sector 
-		public static final int HEUR_THRESHOLD=100;
-	}
 	public int side=0;
 	public int roundsToEnd = 0;
 	public int specialShots = 10;
 	public Sector[][] battlefield = 
 			new Sector[StatusConsts.SECTOR_SIZE][StatusConsts.SECTOR_SIZE];
-	
-	//TODO: otestovat
 	
 	public int[] findAirstrikePos(){
 		int PosBest[]= {15,15};

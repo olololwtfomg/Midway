@@ -1,16 +1,11 @@
+import usedConsts.Heuristic;
+import usedConsts.ConditionConstants;
 
 public class Sector {
 	
 	/*
 	 * TODO: hodnoty podla pravdepodobnostneho modelu
 	 * */
-	public interface SectorConsts{
-		public static final int OWN_SHIP=100;
-		public static final int ENEMY_SHIP=0;
-		public static final int MISSED=20;
-		public static final int HIT=MISSED+10;		
-		public static final int UNKNOWN=0;
-	}
 	
 	int xPos = 0;
 	int yPos = 0;
@@ -50,17 +45,20 @@ public class Sector {
 		switch(this.condition)
 		{
 		// TODO: heuristicke hodnoty pre jednotlive polia
-			case 6:
-			case 1: retval=SectorConsts.OWN_SHIP; break;
-			case 2: retval=SectorConsts.ENEMY_SHIP; break;
-			case 3: 
-			case 4: 
-			case 5: retval=SectorConsts.MISSED; break; 
-			case 7: retval=SectorConsts.HIT; break;
-			case 8:
-			case 9:
+			case ConditionConstants.ALLY_SHIP:
+			case ConditionConstants.ALLY_SUNK: 
+				retval=Heuristic.OWN_SHIP; break;
+			case ConditionConstants.ENEMY_SHIP: retval=Heuristic.ENEMY_SHIP; break;
+			case ConditionConstants.NOTHING_HIT: 
+			case ConditionConstants.ENEMY_NOTHING: 
+			case ConditionConstants.OUR_NOTHING: 
+				retval=Heuristic.MISSED; break; 
+			case ConditionConstants.ENEMY_SUNK: 
+				retval=Heuristic.HIT; break;
+			case ConditionConstants.PROBABLY_BLANK:
+			case ConditionConstants.UNKNOWN:
 			default:
-				retval=SectorConsts.UNKNOWN;
+				retval=Heuristic.UNKNOWN;
 		}
 		return retval;
 	}
