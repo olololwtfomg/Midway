@@ -11,6 +11,7 @@ public class Jenny {
 	private enum OS_type {
 		WINDOWS,LINUX 
 	}
+	
 
 	private static OS_type os_type=OS_type.LINUX;
 
