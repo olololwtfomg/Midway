@@ -15,38 +15,52 @@ public class ActualStatus {
 	public Sector[][] battlefield = 
 			new Sector[StatusConsts.SECTOR_SIZE][StatusConsts.SECTOR_SIZE];
 	
-	
+	//TODO: otestovat
 	public void calculateHeuristics()
 	{
+		Sector currSector;
 		for(int xAxis=StatusConsts.HEUR_OFFSET;
 				xAxis<(StatusConsts.SECTOR_SIZE-StatusConsts.HEUR_OFFSET);
 				xAxis++){
 			for(int yAxis=StatusConsts.HEUR_OFFSET;
 					yAxis<(StatusConsts.SECTOR_SIZE-StatusConsts.HEUR_OFFSET);
 					yAxis++){
-				battlefield[xAxis][yAxis].setHeurValue(
-						calculateSectorHeuristics(xAxis,yAxis));
+				/*there's no point in calculating it over and over again
+				 * if we know it's a bad location to do an air strike*/
+				currSector=battlefield[xAxis][yAxis];
+				if(currSector.getHeurValue()>StatusConsts.HEUR_THRESHOLD){
+					currSector.setHeurValue(
+							calculateSectorHeuristics(xAxis,yAxis));
+				}
 			}
 		}
 	}
-
-	private int calculateSectorHeuristics(int x, int y)
+	//TODO: otestovat
+	public int calculateSectorHeuristics(int x, int y)
 	{
-		int value=0;
+		int value;
+		int retval=0;
 		for(int xAxis=(x-StatusConsts.HEUR_OFFSET);
 				xAxis<(x+StatusConsts.HEUR_OFFSET);
 				xAxis++){
 			for(int yAxis=y-StatusConsts.HEUR_OFFSET;
 					yAxis<(y+StatusConsts.HEUR_OFFSET);
 					yAxis++){
-				if(value>StatusConsts.HEUR_THRESHOLD)
+				if(retval>StatusConsts.HEUR_THRESHOLD)
 				{
-					return value;
+					return retval;
 				}
-				value+=battlefield[xAxis][yAxis].getSpecialValue();
+				try{
+					value=battlefield[xAxis][yAxis].getSpecialValue();
+				}
+				catch(ArrayIndexOutOfBoundsException ex)
+				{
+					value=100;
+				}
+				retval+=value;
 			}
 		}
-		return value;
+		return retval;
 	}
 
 }
