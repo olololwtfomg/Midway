@@ -6,7 +6,7 @@ import java.util.Random;
 
 
 public class Jenny {
-
+	static ActualStatus status;
 
 	private enum OS_type {
 		WINDOWS,LINUX 
@@ -18,7 +18,7 @@ public class Jenny {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		ActualStatus status = loadStatus();
+		status = loadStatus();
 		loadLog(status);
 		Sector temp = selectRandom(status);
 		System.out.println(status.battlefield[0][1].condition);
@@ -51,77 +51,14 @@ public class Jenny {
 			br = new BufferedReader(new FileReader(file));
 			currentLine = br.readLine();
 			int index = 0;
-			int inputCondition = 0;
 			int logCondition = 0;
 			while ((currentLine = br.readLine()) != null) {
 				if (index<15) {
 					for (int column = 0; column< currentLine.length() && column<15; column++) {
 						if (!badInputFile) {
-							//1 for own ship, 2 for enemy ship
-							//3 for unknown shot, 4 for own shot, 5 for enemy shot
-							//6 for ally ship hit, 7 for enemy ship hit,
-							//8 for lowest priority, 9 for high priority, 0 for unknown
-
-							inputCondition = status.battlefield[index][column].condition;
 							logCondition = parseStatus(currentLine.charAt(column));
-							if (inputCondition == 1) {  //its ally ship there
-								//copy from input
-							} else if (inputCondition == 3) {  //someone shot, no hit
-								switch (logCondition) {
-								case 3:  //check if we shot in last round or its enemy shot (special mode if torpedo or firework used)
-									break;
-								case 4:  //old shot
-									break;
-								case 5:  //old shot
-									break;
-								default: //copy from input
-									break;
-								}
-							} else if (inputCondition == 6) {  //ally ship sunken
-								switch (logCondition) {
-								case 1:  //enemy new hit
-									break;
-								case 6:  //old or expected (own hit)
-									break;
-								default: //copy from input
-									break;
-								}
-							} else if (inputCondition == 7) {  //enemy ship hit
-								switch (logCondition) {
-								case 2:  //cool logic - reapeat and won
-									break;
-								case 4:  //last shot succeded
-								case 7:  //old record
-									break;
-								case 8:  //
-									break;
-								case 9: 
-									break;
-								default:  //enemy destroyed own ship
-									break;
-								}
-							} else if (inputCondition == 0) {  //unknown
-								switch (logCondition) {
-								case 1:
-									break;
-								case 2: 
-									break;
-								case 3:
-									break;
-								case 4:
-									break;
-								case 5: 
-									break;
-								case 6:
-									break;
-								case 7: 
-									break;
-								case 8: 
-									break;
-								case 9: 
-									break;
-								}
-							}
+							compareBeforeNowSector(logCondition, status.battlefield[index][column]);
+							
 						}
 
 					}
@@ -143,7 +80,85 @@ public class Jenny {
 
 		}
 	}
-
+	
+	private static void compareBeforeNowSector(int input,
+			Sector sector) {
+		int log = sector.condition; //status from log
+		if (log == 1) {  //its ally ship there
+			makeNearestBlank(sector);
+		} else if (log == 3) {  //someone shot, no hit
+			switch (input) {
+			case 2:  //our new shot
+			case 8:
+			case 9:  //our new shot
+			case 0:  //
+			case 3:  //check if we shot in last round or its enemy shot (special mode if torpedo or firework used)
+				break;
+			case 4:  //our shot, no hit
+			case 5:  //old shot copy from log
+				break;
+			default: //copy from input
+				break;
+			}
+		} else if (log == 6) {  //ally ship sunken
+			switch (input) {
+			case 1:  //enemy new hit
+				break;
+			case 6:  //old or expected (own hit)
+				break;
+			default: //copy from input
+				break;
+			}
+		} else if (log == 7) {  //enemy ship hit
+			switch (input) {
+			case 2:  //cool logic - reapeat and won
+				break;
+			case 0:  //something destroyed enemy ship (special bomb/selfshot)
+			case 4:  //last shot succeded - continue in shoting around
+				break;
+			case 7:  //old record
+				break;
+			case 8:  //bad logic (enemy destroyed own ship in sector that should not contain ship)
+				break;
+			case 9:  //special bomb succeded
+				break;
+			default:  //enemy destroyed own ship
+				break;
+			}
+		} else if (log == 0) {  //unknown - in log is our logic
+			switch (input) {
+			case 2:  //copy from log
+				break;
+			case 8:  //copy from log
+				break;
+			case 9:  //copy from log
+				break;
+			default: //copy from now
+				break;
+			}
+		}
+		//1 for own ship, 2 for enemy ship
+		//3 for unknown shot, 4 for own shot, 5 for enemy shot
+		//6 for ally ship hit, 7 for enemy ship hit,
+		//8 for lowest priority, 9 for high priority, 0 for unknown
+	}
+	
+	private static void makeNearestBlank(Sector sector) {
+		int x = sector.xPos, y = sector.yPos;
+		Sector temp;
+		int[] nearest = { x-1, y, x, y+1, x+1, y, x, y-1}; 
+		for (int i = 0; i<4; i++) {
+			x = nearest[i];
+			y = nearest[i+1];
+			if (x<14 && y<14 && x>=0 && y>=0) {
+				temp = status.battlefield[x][y];
+				switch (temp.condition) {
+				case 0:	case 9:	case 8:	case 2: temp.condition = 8; break;
+				}
+			}
+		}
+		
+	}
 	private static ActualStatus loadStatus() {
 		BufferedReader br = null;
 		ActualStatus status = new ActualStatus();
@@ -210,10 +225,6 @@ public class Jenny {
 
 		}
 		return status;
-	}
-
-	private static int parseStatus(String str) {
-		return parseStatus(str.charAt(0));
 	}
 
 	private static int parseStatus(char charAt) {

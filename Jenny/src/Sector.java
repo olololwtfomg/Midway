@@ -43,9 +43,10 @@ public class Sector {
 		switch(this.condition)
 		{
 		// TODO: heuristicke hodnoty pre jednotlive polia
-			case 3: retval=SectorConsts.OWN_SHIP; break;
+			case 1: retval=SectorConsts.OWN_SHIP; break;
 			case 2: retval=SectorConsts.ENEMY_SHIP; break;
-			case 1: retval=SectorConsts.MISSED; break;
+			case 4:
+			case 5: retval=SectorConsts.MISSED; break;  //missed by who? ... condition 3 je len vstupny udaj a mal by byt na zaklade logiky rozsireny na 4/5
 			case 0:
 			default:
 				retval=SectorConsts.UNKNOWN;
