@@ -22,7 +22,10 @@ public class Jenny {
 		loadLog(status);
 		Sector temp = selectRandom(status);
 		System.out.println(status.battlefield[0][1].condition);
+		int heurTemp=status.calculateSectorHeuristics(1, 1);
+		System.out.println(" Heuristicka hodnota" + heurTemp);
 		System.out.println("Nahodna pozicia: [" + temp.xPos + ","+ temp.yPos + "] " + temp.condition);
+		
 
 	}
 	private static void loadLog(ActualStatus status) { loadLog(status, false); }
@@ -236,28 +239,28 @@ public class Jenny {
 		//8 for lowest priority, 9 for high priority, 0 for unknown
 
 		switch (charAt) {
-		case 49:  //one
+		case '1':  //one
 			condition = 1; break;  //ally ship, floating
-		case 50:  //two
+		case '2':  //two
 			condition = 2; break;  //enemy ship = max priority
-		case 51:  //three          //bad logic sector in log
-		case 46:  //dot
+		case '3':  //three          //bad logic sector in log
+		case '.':  //dot
 			condition = 3; break;  //nothing, hit
-		case 52:  //four
+		case '4':  //four
 			condition = 4; break;  //our shot on nothing  /extends 3
-		case 53:  //five
+		case '5':  //five
 			condition = 5; break;  //enemy shot on nothing  /extends 3
-		case 54:  //six
-		case 42:  //star
+		case '6':  //six
+		case '*':  //star
 			condition = 6; break;  //ally ship, sunk
-		case 55:  //seven
-		case 43:  //plus
+		case '7':  //seven
+		case '+':  //plus
 			condition = 7; break;  //enemy ship, sunk
-		case 56:  //eight
+		case '8':  //eight
 			condition = 8; break;  //probably blank sector
-		case 57:  //nine
+		case '9':  //nine
 			condition = 9; break;  //next round shot
-		case 32:  //space
+		case ' ':  //space
 			condition = 0; break;  //unknown
 		}
 		return condition;
@@ -267,7 +270,7 @@ public class Jenny {
 		Random rnd = new Random();
 		return status.battlefield[rnd.nextInt(status.battlefield.length)][rnd.nextInt(status.battlefield[0].length)];
 	}
-
+	
 	/*
 		for (int row = 0; row<status.battlefield.length;row++) {
 			for (int column = 0; column<status.battlefield[0].length;column++) {
