@@ -34,7 +34,6 @@ public class ActualStatus {
 		}
 	}
     
-	//TODO: otestovat
 	public int calculateSectorHeuristics(int x, int y)
 	{
 		int value;
