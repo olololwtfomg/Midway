@@ -1,11 +1,15 @@
 
 
 public class Sector {
+	/*
+	 * TODO: hodnoty podla pravdepodobnostneho modelu
+	 * */
 	
 	public interface SectorConsts{
 		public static final int OWN_SHIP=100;
-		public static final int ENEMY_SHIP=10;
-		public static final int MISSED=25;
+		public static final int ENEMY_SHIP=0;
+		public static final int MISSED=20;
+		public static final int HIT=MISSED+10;		
 		public static final int UNKNOWN=0;
 	}
 	
@@ -38,16 +42,24 @@ public class Sector {
 	{
 		this.heurValue=value;
 	}
+	
+	public int getHeurValue(){
+		return this.heurValue;
+	}
 	public int getSpecialValue(){
 		int retval=0;
 		switch(this.condition)
 		{
 		// TODO: heuristicke hodnoty pre jednotlive polia
+			case 6:
 			case 1: retval=SectorConsts.OWN_SHIP; break;
 			case 2: retval=SectorConsts.ENEMY_SHIP; break;
-			case 4:
-			case 5: retval=SectorConsts.MISSED; break;  //missed by who? ... condition 3 je len vstupny udaj a mal by byt na zaklade logiky rozsireny na 4/5
-			case 0:
+			case 3: 
+			case 4: 
+			case 5: retval=SectorConsts.MISSED; break; 
+			case 7: retval=SectorConsts.HIT; break;
+			case 8:
+			case 9:
 			default:
 				retval=SectorConsts.UNKNOWN;
 		}
