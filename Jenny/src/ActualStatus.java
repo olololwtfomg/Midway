@@ -33,6 +33,7 @@ public class ActualStatus {
 					{
 						PosBest[0]=xAxis;
 						PosBest[1]=yAxis;
+						best=currHeurValue;
 					}
 						
 				}

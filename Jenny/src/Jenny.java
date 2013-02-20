@@ -22,8 +22,10 @@ public class Jenny {
 		loadLog(status);
 		Sector temp = selectRandom(status);
 		System.out.println(status.battlefield[0][1].condition);
-		//status.calculateHeuristics();
-		//status.print_heuristics();
+		status.calculateHeuristics();
+		status.print_heuristics();
+		int position[]=status.findAirstrikePos();
+		System.out.println("launch airstrike on position x"+position[0]+"y"+position[1]);
 		System.out.println("Nahodna pozicia: [" + temp.xPos + ","+ temp.yPos + "] " + temp.condition);
 		
 
