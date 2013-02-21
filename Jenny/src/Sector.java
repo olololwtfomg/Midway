@@ -1,5 +1,5 @@
+import usedConsts.Const;
 import usedConsts.Heuristic;
-import usedConsts.ConditionConstants;
 
 public class Sector {
 	
@@ -15,10 +15,10 @@ public class Sector {
 	//6 for ally ship hit, 7 for enemy ship hit,
 	//8 for lowest priority, 9 for high priority, 0 for unknown
 	int condition = 0;
+	int priority = 50;  //0 - 100 ... 0 for blank, 50 standard shot, 80 high priority
 	
 	int heurValue= 0; //for heuristics
-	
-	boolean highPriority = false;
+
 	public Sector(int condition) {
 		this.condition = condition;
 	}
@@ -26,6 +26,9 @@ public class Sector {
 		this.condition = condition;
 		this.xPos = x;
 		this.yPos = y;
+	}
+	public Sector(int condition, int priority, int x, int y) {
+		
 	}
 
 	public void setPosition(int x, int y) {
@@ -45,18 +48,18 @@ public class Sector {
 		switch(this.condition)
 		{
 		// TODO: heuristicke hodnoty pre jednotlive polia
-			case ConditionConstants.ALLY_SHIP:
-			case ConditionConstants.ALLY_SUNK: 
+			case Const.ALLY_SHIP:
+			case Const.ALLY_SUNK: 
 				retval=Heuristic.OWN_SHIP; break;
-			case ConditionConstants.ENEMY_SHIP: retval=Heuristic.ENEMY_SHIP; break;
-			case ConditionConstants.NOTHING_HIT: 
-			case ConditionConstants.ENEMY_NOTHING: 
-			case ConditionConstants.OUR_NOTHING: 
+			case Const.ENEMY_SHIP: retval=Heuristic.ENEMY_SHIP; break;
+			case Const.NOTHING_HIT: 
+			case Const.ENEMY_NOTHING: 
+			case Const.OUR_NOTHING: 
 				retval=Heuristic.MISSED; break; 
-			case ConditionConstants.ENEMY_SUNK: 
+			case Const.ENEMY_SUNK: 
 				retval=Heuristic.HIT; break;
-			case ConditionConstants.PROBABLY_BLANK:
-			case ConditionConstants.UNKNOWN:
+			case Const.PROBABLY_BLANK:
+			case Const.UNKNOWN:
 			default:
 				retval=Heuristic.UNKNOWN;
 		}

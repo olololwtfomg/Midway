@@ -4,10 +4,15 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Random;
 
-import usedConsts.ConditionConstants;
+import usedConsts.Const;
 
 public class Jenny {
 	static ActualStatus status;
+	
+	private static final String inputFile = "battlefield.txt";
+	private static final String logFile = "log.txt";
+	private static final String winPath = "\\src\\";
+	private static final String unixPath = "/src/";
 
 	private enum OS_type {
 		WINDOWS,LINUX 
@@ -31,8 +36,8 @@ public class Jenny {
 		*/
 		System.out.println("Nahodna pozicia: [" + temp.xPos + ","+ temp.yPos + "] " + temp.condition);
 		
-
 	}
+	
 	private static void loadLog(ActualStatus status) { loadLog(status, false); }
 	private static void loadLog(ActualStatus status, boolean badInputFile) {
 		BufferedReader br = null;
@@ -41,39 +46,46 @@ public class Jenny {
 		switch(Jenny.os_type)
 		{
 		case WINDOWS:
-			logFileName=".\\src\\battlefield.txt";
-			break;
-		case LINUX:
-			logFileName="./src/battlefield.txt";
+			logFileName= String.format(".%s%s",winPath, logFile);
 			break;
 		default:
-			logFileName="./src/battlefield.txt";	
+			logFileName= String.format(".%s%s",unixPath, logFile);
 			break;
 		}
 
 		try {	//nacitanie zo suboru
 			File file = new File(logFileName);
 			if (!file.isFile()) {
-				//log is broken ... create new
+				//log is broken ... create new based on system input
 			}
 			br = new BufferedReader(new FileReader(file));
 			currentLine = br.readLine();
-			int index = 0;
+			int priorTemp = 0;
+			
+			int battlefieldRow = 0;
 			int logCondition = 0;
 			while ((currentLine = br.readLine()) != null) {
-				if (index<15) {
+				if (battlefieldRow<15) {
 					for (int column = 0; column< currentLine.length() && column<15; column++) {
-						if (!badInputFile) {
-							logCondition = parseStatus(currentLine.charAt(column));
-							compareBeforeNowSector(logCondition, status.battlefield[index][column]);
+						logCondition = parseStatus(currentLine.charAt(column));
+						if (!badInputFile) {  
+							compareBeforeNowSector(logCondition, status.battlefield[battlefieldRow][column]);
 							
+						} else {  //nebol spravne nacitany input ... ziadne nove informacie o battlefield
+							switch (logCondition) {
+							case Const.PROBABLY_BLANK: priorTemp = Const.PRIOR_MIN; break;
+							case Const.UNKNOWN: priorTemp = Const.PRIOR_UNKNOWN; break;
+							case Const.NEXT_ROUND_SHOT: priorTemp = Const.PRIOR_SOON; break;
+							case Const.ENEMY_SHIP: priorTemp = Const.PRIOR_MAX; break;
+							}
+							status.battlefield[battlefieldRow][column] = new Sector(logCondition, priorTemp, battlefieldRow, column);
 						}
 
 					}
-					index++;
+					battlefieldRow++;
 				} else {
-					System.err.println("Vstupny subor nema spravny format. Posledny riadok: " + (index - 1) + ", pocet znakov: " + currentLine.length());
-					index++;
+					System.err.println("Vstupny subor nema dost riadkov pre battlefield. Posledny riadok: " + (battlefieldRow - 1) + ", pocet znakov: " + currentLine.length());
+					battlefieldRow++;
 				}
 			}			
 		} catch (IOException e) {
@@ -161,9 +173,9 @@ public class Jenny {
 			if (x<14 && y<14 && x>=0 && y>=0) {
 				temp = status.battlefield[x][y];
 				switch (temp.condition) {
-				case ConditionConstants.UNKNOWN:
-				case ConditionConstants.ENEMY_SHIP:
-				case ConditionConstants.NEXT_ROUND_SHOT: temp.condition = ConditionConstants.PROBABLY_BLANK; break;
+				case Const.UNKNOWN:
+				case Const.ENEMY_SHIP:
+				case Const.NEXT_ROUND_SHOT: temp.condition = Const.PROBABLY_BLANK; break;
 				}
 			}
 		}
@@ -177,13 +189,10 @@ public class Jenny {
 		switch(Jenny.os_type)
 		{
 		case WINDOWS:
-			logFileName=".\\src\\battlefield.txt";
-			break;
-		case LINUX:
-			logFileName="./src/battlefield.txt";
+			logFileName= String.format(".%s%s",winPath, inputFile);
 			break;
 		default:
-			logFileName="./src/battlefield.txt";	
+			logFileName= String.format(".%s%s",unixPath, inputFile);
 			break;
 		}
 		int index = 0;
@@ -246,29 +255,29 @@ public class Jenny {
 		//8 for lowest priority, 9 for high priority, 0 for unknown
 
 		switch (charAt) {
-		case '1':  //one
-			condition = ConditionConstants.ALLY_SHIP; break;  //ally ship, floating
-		case '2':  //two
-			condition = ConditionConstants.ENEMY_SHIP; break;  //enemy ship = max priority
-		case '3':  //three          //bad logic sector in log
-		case '.':  //dot
-			condition = ConditionConstants.NOTHING_HIT; break;  //nothing, hit
-		case '4':  //four
-			condition = ConditionConstants.OUR_NOTHING; break;  //our shot on nothing  /extends 3
-		case '5':  //five
-			condition = ConditionConstants.ENEMY_NOTHING; break;  //enemy shot on nothing  /extends 3
-		case '6':  //six
-		case '*':  //star
-			condition = ConditionConstants.ALLY_SUNK; break;  //ally ship, sunk
-		case '7':  //seven
-		case '+':  //plus
-			condition = ConditionConstants.ENEMY_SUNK; break;  //enemy ship, sunk
-		case '8':  //eight
-			condition = ConditionConstants.PROBABLY_BLANK; break;  //probably blank sector
-		case '9':  //nine
-			condition = ConditionConstants.NEXT_ROUND_SHOT; break;  //next round shot
-		case ' ':  //space
-			condition = ConditionConstants.UNKNOWN; break;  //unknown
+		case '1':
+			condition = Const.ALLY_SHIP; break;  //ally ship, floating
+		case '2':
+			condition = Const.ENEMY_SHIP; break;  //enemy ship = max priority
+		case '3':          //bad sector in log
+		case '.':
+			condition = Const.NOTHING_HIT; break;  //nothing, hit
+		case '4':
+			condition = Const.OUR_NOTHING; break;  //our shot on nothing  /extends 3
+		case '5':
+			condition = Const.ENEMY_NOTHING; break;  //enemy shot on nothing  /extends 3
+		case '6':
+		case '*':
+			condition = Const.ALLY_SUNK; break;  //ally ship, sunk
+		case '7':
+		case '+':
+			condition = Const.ENEMY_SUNK; break;  //enemy ship, sunk
+		case '8':
+			condition = Const.PROBABLY_BLANK; break;  //probably blank sector
+		case '9':
+			condition = Const.NEXT_ROUND_SHOT; break;  //next round shot
+		case ' ':
+			condition = Const.UNKNOWN; break;  //unknown
 		}
 		return condition;
 	}
