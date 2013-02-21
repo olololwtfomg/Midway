@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Random;
 
 import usedConsts.Const;
 
@@ -25,15 +24,33 @@ public class Jenny {
 	public static void main(String[] args) {
 		status = loadStatus();
 		loadLog(status);
-		Sector temp = selectRandom(status);
-		System.out.println(status.battlefield[0][1].condition);
+		Sector shot = Strategies.doSomeLogic(status);
+		String lastWord = "";
+		if (shot.action != '0') {
+			switch (shot.action) {
+			case Const.BOMB:
+				break;
+			case Const.TORPEDO:
+				break;
+			case Const.FIREWORK:
+				break;
+			case Const.SHOT:
+			default:
+				lastWord = String.format("%c [%d] [%d]", Const.SHOT, shot.xPos, shot.yPos);
+				shot.condition = Const.OUR_SHOT;
+				break;
+			}
+		}
+		saveStatusToLog(shot);
+		System.out.println(lastWord);
+		//System.out.format("%s [%d] [%d]", shot.)
+		//System.out.format("%s [%d] [%d] %c",
 		/*
 		status.calculateHeuristics();
 		status.print_heuristics();
 		int position[]=status.findAirstrikePos();
 		System.out.println("launch airstrike on position x"+position[0]+"y"+position[1]);
 		*/
-		System.out.println("Nahodna pozicia: [" + temp.xPos + ","+ temp.yPos + "] " + temp.condition);
 		
 	}
 	
@@ -61,6 +78,7 @@ public class Jenny {
 			br = new BufferedReader(new FileReader(file));
 			currentLine = br.readLine(); //round
 			currentLine = br.readLine(); //priorities
+			currentLine = br.readLine(); //last move
 			int priorTemp = 0;
 			
 			int battlefieldRow = 0;
@@ -169,20 +187,8 @@ public class Jenny {
 		//6 for ally ship hit, 7 for enemy ship hit,
 		//8 for lowest priority, 9 for high priority, 0 for unknown
 	}
-	public static void shootAt(Sector sector) {
-		shootAt(sector.xPos, sector.yPos);
-	}
-	public static void shootAt(int x, int y) {
-		status.battlefield[x][y].condition = Const.OUR_SHOT;
-		int tryToSave = 0;
-		boolean uncompleteSave = false;
-		do {
-			uncompleteSave = ! saveStatusToLog();
-		} while (tryToSave<3 && uncompleteSave);
-		System.out.format("m [%d] [%d]", x, y);
-	}
 	
-	private static boolean saveStatusToLog() {
+	private static boolean saveStatusToLog(Sector lastShot) {
 		String logFileName;
 		switch(Jenny.os_type)
 		{
@@ -208,10 +214,13 @@ public class Jenny {
 			return false;
 		}
 		BufferedWriter bw = null;
-		StringBuffer currLine = new StringBuffer("");
 		try {
 			bw = new BufferedWriter(new FileWriter(file));
-			
+			bw.write(status.round++ + "\n");  //round
+			bw.write("10 20 30" + "\n");  //priorities
+			if (lastShot == null) { bw.newLine(); }
+			else { bw.write(" " + "\n"); } //last shot
+			StringBuffer currLine = new StringBuffer("");
 			for (int row = 0; row<status.battlefield.length; row++) {
 				for (int column = 0; column<status.battlefield[row].length; column++) {
 					currLine.append(status.battlefield[row][column]);
@@ -352,11 +361,6 @@ public class Jenny {
 			condition = Const.UNKNOWN; break;  //unknown
 		}
 		return condition;
-	}
-
-	private static Sector selectRandom(ActualStatus status) {
-		Random rnd = new Random();
-		return status.battlefield[rnd.nextInt(status.battlefield.length)][rnd.nextInt(status.battlefield[0].length)];
 	}
 	
 	/*
