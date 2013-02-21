@@ -1,9 +1,12 @@
 import java.util.Random;
 
+import usedConsts.Const;
+
 
 public class Strategies {
 	public static Sector doSomeLogic(ActualStatus status) {
-		return null;
+		status.battlefield[0][13].action = Const.SHOT;
+		return status.battlefield[0][13];
 	}
 	
 	

@@ -51,7 +51,7 @@ public class Jenny {
 		int position[]=status.findAirstrikePos();
 		System.out.println("launch airstrike on position x"+position[0]+"y"+position[1]);
 		*/
-		
+
 	}
 	
 	private static void loadLog(ActualStatus status) { loadLog(status, false); }
@@ -223,7 +223,7 @@ public class Jenny {
 			StringBuffer currLine = new StringBuffer("");
 			for (int row = 0; row<status.battlefield.length; row++) {
 				for (int column = 0; column<status.battlefield[row].length; column++) {
-					currLine.append(status.battlefield[row][column]);
+					currLine.append(status.battlefield[row][column].condition);
 				}
 				bw.write(currLine.toString());
 				bw.newLine();
