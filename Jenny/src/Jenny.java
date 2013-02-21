@@ -11,10 +11,10 @@ import usedConsts.Const;
 public class Jenny {
 	static ActualStatus status;
 	
-	private static final String INPUT_FILE = "battlefield.txt";
-	private static final String LOG_FILE = "log.txt";
-	private static final String WIN_PATH = "\\src\\";
-	private static final String UNIX_PATH = "/src/";
+	private static final String INPUT_FILE_PATH = ".%ssrc%<sbattlefield.txt";
+	private static final String LOG_FILE_PATH = ".%ssrc%<slog.txt";
+	private static final String WIN_PATH_SEP = "\\";
+	private static final String UNIX_PATH_SEP = "/";
 
 	private enum OS_type {
 		WINDOWS,LINUX 
@@ -22,9 +22,6 @@ public class Jenny {
 
 	private static OS_type os_type=OS_type.LINUX;
 
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) {
 		status = loadStatus();
 		loadLog(status);
@@ -47,30 +44,32 @@ public class Jenny {
 		switch(Jenny.os_type)
 		{
 		case WINDOWS:
-			logFileName= String.format(".%s%s",WIN_PATH, LOG_FILE);
+			logFileName= String.format(LOG_FILE_PATH,WIN_PATH_SEP);
 			break;
 		default:
-			logFileName= String.format(".%s%s",UNIX_PATH, LOG_FILE);
+			logFileName= String.format(LOG_FILE_PATH,UNIX_PATH_SEP);
 			break;
 		}
 
-		try {	//nacitanie zo suboru
+		try {
 			File file = new File(logFileName);
 			if (!file.isFile()) {
+				System.err.println("Log neexistuje.");
 				//log is broken ... create new based on system input
 			}
 			br = new BufferedReader(new FileReader(file));
-			currentLine = br.readLine();
+			currentLine = br.readLine(); //round
+			currentLine = br.readLine(); //priorities
 			int priorTemp = 0;
 			
 			int battlefieldRow = 0;
 			int logCondition = 0;
 			while ((currentLine = br.readLine()) != null) {
-				if (battlefieldRow<15) {
+				if (battlefieldRow<14) {
 					for (int column = 0; column< currentLine.length() && column<15; column++) {
 						logCondition = parseStatus(currentLine.charAt(column));
 						if (!badInputFile) {  
-							compareBeforeNowSector(logCondition, status.battlefield[battlefieldRow][column]);
+							compareBeforeNowSector(status.battlefield[battlefieldRow][column], logCondition);
 							
 						} else {  //nebol spravne nacitany input ... ziadne nove informacie o battlefield
 							switch (logCondition) {
@@ -90,8 +89,8 @@ public class Jenny {
 				}
 			}			
 		} catch (IOException e) {
-			System.err.println("Nieje mozne citat subor.");
-			//log is broken ... we are screwed
+			System.err.println("Nieje mozne citat log.");
+			//log is broken ... load from system input (was done probabbly) and initialize new log
 		} finally {
 			try {
 				if (br != null) br.close();
@@ -102,59 +101,65 @@ public class Jenny {
 		}
 	}
 	
-	private static void compareBeforeNowSector(int input,
-			Sector sector) {
-		int log = sector.condition; //status from log
-		if (log == 1) {  //its ally ship there
+	private static void compareBeforeNowSector(Sector sector, int log) {
+		int input = sector.condition; //status from actual input
+		if (input == Const.ALLY_SHIP) {  //its ally ship there
 			makeNearestBlank(sector);
-		} else if (log == 3) {  //someone shot, no hit
-			switch (input) {
-			case 2:  //our new shot
-			case 8:
-			case 9:  //our new shot
-			case 0:  //
-			case 3:  //check if we shot in last round or its enemy shot (special mode if torpedo or firework used)
+		} else if (input == Const.SOME_SHOT) {  //someone shot, no hit
+			switch (log) {  //before:
+			case Const.ENEMY_SHIP:
+			case Const.PROBABLY_BLANK:
+			case Const.NEXT_ROUND_SHOT:
+			case Const.UNKNOWN:
+				//check if we shot (torpedo or firework) this way else its enemy shot
+				sector.condition = Const.ENEMY_SHOT;
 				break;
-			case 4:  //our shot, no hit
-			case 5:  //old shot copy from log
+			case Const.OUR_SHOT:  //old our shot
+			case Const.ENEMY_SHOT:  //old enemy shot
+				sector.condition = log;
 				break;
-			default: //copy from input
-				break;
-			}
-		} else if (log == 6) {  //ally ship sunken
-			switch (input) {
-			case 1:  //enemy new hit
-				break;
-			case 6:  //old or expected (own hit)
-				break;
-			default: //copy from input
+			case Const.SOME_SHOT:    //possible if there was problem with log in last round (copyed directly from input) or this is first round and the shot is from enemy
+				sector.condition = Const.ENEMY_SHOT;
 				break;
 			}
-		} else if (log == 7) {  //enemy ship hit
-			switch (input) {
-			case 2:  //cool logic - reapeat and won
+		} else if (input == Const.ALLY_SUNK) {  //ally ship sunken
+			switch (log) {
+			case Const.ALLY_SHIP:  //enemy new hit
 				break;
-			case 0:  //something destroyed enemy ship (special bomb/selfshot)
-			case 4:  //last shot succeded - continue in shoting around
+			case Const.ALLY_SUNK:  //old or expected (own hit)
+				sector.condition = log;
 				break;
-			case 7:  //old record
+			}
+		} else if (input == Const.ENEMY_SUNK) {  //enemy ship sunken
+			switch (log) {
+			case Const.ENEMY_SUNK:  //old record
 				break;
-			case 8:  //bad logic (enemy destroyed own ship in sector that should not contain ship)
+			case Const.ENEMY_SHIP:  //cool logic - reapeat and won
 				break;
-			case 9:  //special bomb succeded
+			case Const.UNKNOWN:  //something destroyed enemy ship (special bomb/enemy)
+			case Const.OUR_SHOT:  //last shot succeded - continue in shoting around
+				status.enemyJustHit = sector;
+				break;
+			case Const.PROBABLY_BLANK:  //bad logic (enemy destroyed own ship in sector that should not contain ship)
+				break;
+			case Const.NEXT_ROUND_SHOT:  //special bomb succeded
 				break;
 			default:  //enemy destroyed own ship
 				break;
 			}
-		} else if (log == 0) {  //unknown - in log is our logic
-			switch (input) {
-			case 2:  //copy from log
+		} else if (input == Const.UNKNOWN) {  //unknown - in log is our logic
+			switch (log) {
+			case Const.ENEMY_SHIP:  
+				
+				//initialize priority from log
 				break;
-			case 8:  //copy from log
+			case Const.PROBABLY_BLANK:  
+				//initialize priority from log
 				break;
-			case 9:  //copy from log
+			case Const.NEXT_ROUND_SHOT:  
+				//initialize priority from log
 				break;
-			default: //copy from now
+			default: //copy from input
 				break;
 			}
 		}
@@ -181,10 +186,10 @@ public class Jenny {
 		switch(Jenny.os_type)
 		{
 		case WINDOWS:
-			logFileName= String.format(".%s%s",WIN_PATH, LOG_FILE);
+			logFileName= String.format(LOG_FILE_PATH,WIN_PATH_SEP);
 			break;
 		default:
-			logFileName= String.format(".%s%s",UNIX_PATH, LOG_FILE);
+			logFileName= String.format(LOG_FILE_PATH,UNIX_PATH_SEP);
 			break;
 		}
 
@@ -255,10 +260,10 @@ public class Jenny {
 		switch(Jenny.os_type)
 		{
 		case WINDOWS:
-			logFileName= String.format(".%s%s",WIN_PATH, INPUT_FILE);
+			logFileName= String.format(INPUT_FILE_PATH,WIN_PATH_SEP);
 			break;
 		default:
-			logFileName= String.format(".%s%s",UNIX_PATH, INPUT_FILE);
+			logFileName= String.format(INPUT_FILE_PATH,UNIX_PATH_SEP);
 			break;
 		}
 		int index = 0;
@@ -295,7 +300,7 @@ public class Jenny {
 			}
 
 		} catch (IOException e) {
-			System.err.println("Nieje mozne citat subor.");
+			System.err.println("Nieje mozne citat system input.");
 
 			////////////////////////////////////////////////
 			////////////load status from log
@@ -305,7 +310,7 @@ public class Jenny {
 			try {
 				if (br != null) br.close();
 			} catch (IOException ex) {
-				System.err.println("Citanie suboru nebolo ukoncene.");
+				System.err.println("Citanie system input nebolo ukoncene.");
 			}
 
 		}
@@ -327,7 +332,7 @@ public class Jenny {
 			condition = Const.ENEMY_SHIP; break;  //enemy ship = max priority
 		case '3':          //bad sector in log
 		case '.':
-			condition = Const.NOTHING_HIT; break;  //nothing, hit
+			condition = Const.SOME_SHOT; break;  //nothing, hit
 		case '4':
 			condition = Const.OUR_SHOT; break;  //our shot on nothing  /extends 3
 		case '5':
