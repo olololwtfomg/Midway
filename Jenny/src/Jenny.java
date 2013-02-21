@@ -1,6 +1,8 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Random;
 
@@ -9,10 +11,10 @@ import usedConsts.Const;
 public class Jenny {
 	static ActualStatus status;
 	
-	private static final String inputFile = "battlefield.txt";
-	private static final String logFile = "log.txt";
-	private static final String winPath = "\\src\\";
-	private static final String unixPath = "/src/";
+	private static final String INPUT_FILE = "battlefield.txt";
+	private static final String LOG_FILE = "log.txt";
+	private static final String WIN_PATH = "\\src\\";
+	private static final String UNIX_PATH = "/src/";
 
 	private enum OS_type {
 		WINDOWS,LINUX 
@@ -46,10 +48,10 @@ public class Jenny {
 		switch(Jenny.os_type)
 		{
 		case WINDOWS:
-			logFileName= String.format(".%s%s",winPath, logFile);
+			logFileName= String.format(".%s%s",WIN_PATH, LOG_FILE);
 			break;
 		default:
-			logFileName= String.format(".%s%s",unixPath, logFile);
+			logFileName= String.format(".%s%s",UNIX_PATH, LOG_FILE);
 			break;
 		}
 
@@ -162,7 +164,72 @@ public class Jenny {
 		//6 for ally ship hit, 7 for enemy ship hit,
 		//8 for lowest priority, 9 for high priority, 0 for unknown
 	}
+	public static void shootAt(Sector sector) {
+		shootAt(sector.xPos, sector.yPos);
+	}
+	public static void shootAt(int x, int y) {
+		status.battlefield[x][y].condition = Const.OUR_SHOT;
+		int tryToSave = 0;
+		boolean uncompleteSave = false;
+		do {
+			uncompleteSave = ! saveStatusToLog();
+		} while (tryToSave<3 && uncompleteSave);
+		System.out.format("m [%d] [%d]", x, y);
+	}
 	
+	private static boolean saveStatusToLog() {
+		String logFileName;
+		switch(Jenny.os_type)
+		{
+		case WINDOWS:
+			logFileName= String.format(".%s%s",WIN_PATH, LOG_FILE);
+			break;
+		default:
+			logFileName= String.format(".%s%s",UNIX_PATH, LOG_FILE);
+			break;
+		}
+
+		File file = new File(logFileName);
+		try {
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+		} catch (IOException | SecurityException e) {
+			System.err.println("Nieje mozne vytvorit subor pre log.");
+			return false;
+		}
+		if (!file.canWrite()) {
+			System.err.println("Do suboru pre log sa neda zapisovat.");
+			return false;
+		}
+		BufferedWriter bw = null;
+		StringBuffer currLine = new StringBuffer("");
+		try {
+			bw = new BufferedWriter(new FileWriter(file));
+			
+			for (int row = 0; row<status.battlefield.length; row++) {
+				for (int column = 0; column<status.battlefield[row].length; column++) {
+					currLine.append(status.battlefield[row][column]);
+				}
+				bw.write(currLine.toString());
+				bw.newLine();
+				currLine.delete(0,currLine.length());
+			}
+		} catch (IOException e) {
+			System.err.println("Problem so zapisovanim logu.");
+			return false;
+		} finally {
+			try {
+				if (bw != null) bw.close();
+			} catch (IOException ex) {
+				System.err.println("Log nebol ulozeny.");
+				return false;
+			}
+		}
+		//System.err.println("Subor uspesne vytvoreny.");
+		return true;
+	}
+
 	private static void makeNearestBlank(Sector sector) {
 		int x = sector.xPos, y = sector.yPos;
 		Sector temp;  //        north      east       south      west      northeast   southeast     southwest    northwest
@@ -189,10 +256,10 @@ public class Jenny {
 		switch(Jenny.os_type)
 		{
 		case WINDOWS:
-			logFileName= String.format(".%s%s",winPath, inputFile);
+			logFileName= String.format(".%s%s",WIN_PATH, INPUT_FILE);
 			break;
 		default:
-			logFileName= String.format(".%s%s",unixPath, inputFile);
+			logFileName= String.format(".%s%s",UNIX_PATH, INPUT_FILE);
 			break;
 		}
 		int index = 0;
@@ -263,9 +330,9 @@ public class Jenny {
 		case '.':
 			condition = Const.NOTHING_HIT; break;  //nothing, hit
 		case '4':
-			condition = Const.OUR_NOTHING; break;  //our shot on nothing  /extends 3
+			condition = Const.OUR_SHOT; break;  //our shot on nothing  /extends 3
 		case '5':
-			condition = Const.ENEMY_NOTHING; break;  //enemy shot on nothing  /extends 3
+			condition = Const.ENEMY_SHOT; break;  //enemy shot on nothing  /extends 3
 		case '6':
 		case '*':
 			condition = Const.ALLY_SUNK; break;  //ally ship, sunk

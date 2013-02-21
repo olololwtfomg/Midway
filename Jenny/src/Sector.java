@@ -53,8 +53,8 @@ public class Sector {
 				retval=Heuristic.OWN_SHIP; break;
 			case Const.ENEMY_SHIP: retval=Heuristic.ENEMY_SHIP; break;
 			case Const.NOTHING_HIT: 
-			case Const.ENEMY_NOTHING: 
-			case Const.OUR_NOTHING: 
+			case Const.ENEMY_SHOT: 
+			case Const.OUR_SHOT: 
 				retval=Heuristic.MISSED; break; 
 			case Const.ENEMY_SUNK: 
 				retval=Heuristic.HIT; break;
