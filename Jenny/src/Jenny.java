@@ -37,7 +37,6 @@ public class Jenny {
 		System.out.println("launch airstrike on position x"+position[0]+"y"+position[1]);
 		*/
 		System.out.println("Nahodna pozicia: [" + temp.xPos + ","+ temp.yPos + "] " + temp.condition);
-		
 	}
 	
 	private static void loadLog(ActualStatus status) { loadLog(status, false); }
