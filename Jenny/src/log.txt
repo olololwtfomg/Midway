@@ -1,5 +1,5 @@
 0
-10 20 30
+10 20 30  //needs priority for unknown blank nextShot and enemyShip
  
 57000000000004
 55880000000000
