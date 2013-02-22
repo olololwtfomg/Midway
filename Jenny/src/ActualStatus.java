@@ -1,3 +1,4 @@
+import usedConsts.Heuristic;
 import usedConsts.StatusConsts;
 
 public class ActualStatus {
@@ -52,7 +53,7 @@ public class ActualStatus {
 				/*there's no point in calculating it over and over again
 				 * if we know it's a bad location to do an air strike*/
 				currSector=battlefield[xAxis][yAxis];
-				if(currSector.getHeurValue()<StatusConsts.HEUR_THRESHOLD){
+				if(currSector.getSpecialValue()==Heuristic.OWN_SHIP){
 					currSector.setHeurValue(
 							calculateSectorHeuristics(xAxis,yAxis));
 				}
