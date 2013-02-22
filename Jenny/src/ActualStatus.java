@@ -78,6 +78,34 @@ public class ActualStatus {
     
 	private int calculateSectorHeuristics(int x, int y)
 	{
+		int retval=0;
+		int value;
+		for(int xAxis=x-StatusConsts.HEUR_OFFSET;
+				xAxis<(x+StatusConsts.HEUR_OFFSET);
+				xAxis++){
+			
+				for(int yAxis=y-StatusConsts.HEUR_OFFSET;
+						yAxis<(y+StatusConsts.HEUR_OFFSET);
+						){
+					if(retval>StatusConsts.HEUR_THRESHOLD)
+					{
+						return retval;
+					}
+					value=tryHeurValue(xAxis,yAxis);
+					retval+=value;
+					//aby sme ratali len okraje stvorca 5x5 v okoli vybraneho bodu
+					if((xAxis==x-StatusConsts.HEUR_OFFSET) || 
+							(xAxis==x+StatusConsts.HEUR_OFFSET)){
+						yAxis++;
+					}
+					else{
+						yAxis+=2*StatusConsts.HEUR_OFFSET;
+					}
+				}
+		}
+		return retval;
+
+			/*
 		int value;
 		int retval=0;
 		for(int xAxis=(x-StatusConsts.HEUR_OFFSET);
@@ -101,6 +129,19 @@ public class ActualStatus {
 			}
 		}
 		return retval;
+		*/
 	}
-
+	
+	private int tryHeurValue(int x, int y)
+	{
+		int value;
+		try{
+			value=battlefield[x][y].getSpecialValue();
+		}
+		catch(ArrayIndexOutOfBoundsException ex)
+		{
+			value=100;
+		}
+		return value;
+	}
 }
