@@ -10,6 +10,7 @@ import usedConsts.Const;
 public class Jenny {
 	static ActualStatus status;
 	
+	//private static final String INPUT_FILE_PATH = "battlefield.txt";
 	private static final String INPUT_FILE_PATH = ".%ssrc%<sbattlefield.txt";
 	private static final String LOG_FILE_PATH = ".%ssrc%<slog.txt";
 	private static final String WIN_PATH_SEP = "\\";

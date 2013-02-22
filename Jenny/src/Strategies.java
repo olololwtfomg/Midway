@@ -72,7 +72,7 @@ public class Strategies {
 	
 	private static Sector selectRandom(Sector[] array) {
 		Random rnd = new Random();
-		return array[rnd.nextInt()];
+		return array[rnd.nextInt() % array.length];
 	}
 
 }
