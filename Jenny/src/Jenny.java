@@ -222,7 +222,7 @@ public class Jenny {
 		BufferedWriter bw = null;
 		try {
 			bw = new BufferedWriter(new FileWriter(file));
-			bw.write(status.round++ + "\n");  //round
+			bw.write(++status.round + "\n");  //round
 			
 			//priorities
 			SectorIterator iterator = new SectorIterator(status);
