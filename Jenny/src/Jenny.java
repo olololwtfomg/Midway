@@ -77,7 +77,18 @@ public class Jenny {
 			}
 			br = new BufferedReader(new FileReader(file));
 			currentLine = br.readLine(); //round
-			currentLine = br.readLine(); //priorities
+			
+			currentLine = br.readLine(); //initialize priorities for system input
+			String[] splitLine = currentLine.split("[^0-9]+");
+			int priorityIndex = 0;
+			Sector actual;
+			SectorIterator iterator = new SectorIterator(status);
+			while ((actual = iterator.nextSector()) != null) {
+				if (actual.condition == Const.UNKNOWN) {
+					actual.priority = Integer.parseInt(splitLine[priorityIndex++]);
+				}
+			}
+			
 			currentLine = br.readLine(); //last move
 			int priorTemp = 0;
 			
@@ -142,24 +153,18 @@ public class Jenny {
 				break;
 			}
 		} else if (input == Const.ALLY_SUNK) {  //ally ship sunken
-			switch (log) {
-			case Const.ALLY_SHIP:  //enemy new hit
-				break;
-			case Const.ALLY_SUNK:  //old or expected (own hit)
-				sector.condition = log;
-				break;
+			if (log == Const.ALLY_SHIP) {
+				 //enemy new hit
 			}
 		} else if (input == Const.ENEMY_SUNK) {  //enemy ship sunken
 			switch (log) {
-			case Const.ENEMY_SUNK:  //old record
-				break;
 			case Const.ENEMY_SHIP:  //cool logic - reapeat and won
 				break;
 			case Const.UNKNOWN:  //something destroyed enemy ship (special bomb/enemy)
 			case Const.OUR_SHOT:  //last shot succeded - continue in shoting around
-				status.enemyJustHit = sector;
+				makeNearestNextShot(sector);
 				break;
-			case Const.PROBABLY_BLANK:  //bad logic (enemy destroyed own ship in sector that should not contain ship)
+			case Const.PROBABLY_BLANK:
 				break;
 			case Const.NEXT_ROUND_SHOT:  //special bomb succeded
 				break;
@@ -176,7 +181,7 @@ public class Jenny {
 				//initialize priority from log
 				break;
 			case Const.NEXT_ROUND_SHOT:  
-				//initialize priority from log
+				sector.condition = log;
 				break;
 			default: //copy from input
 				break;
@@ -217,7 +222,23 @@ public class Jenny {
 		try {
 			bw = new BufferedWriter(new FileWriter(file));
 			bw.write(status.round++ + "\n");  //round
-			bw.write("10 20 30" + "\n");  //priorities
+			
+			//priorities
+			SectorIterator iterator = new SectorIterator(status);
+			StringBuffer prioritiesLine = new StringBuffer();
+			Sector actual;
+			while ((actual = iterator.nextSector()) != null) {
+				switch (actual.condition) {
+				case Const.ENEMY_SHIP: 
+				case Const.NEXT_ROUND_SHOT:
+				case Const.UNKNOWN:
+				case Const.PROBABLY_BLANK:
+					prioritiesLine.append(actual.priority + " ");
+					break;
+				}
+			}
+			bw.write(prioritiesLine.toString() + "\n");  
+			
 			if (lastShot == null) { bw.newLine(); }
 			else { bw.write(" " + "\n"); } //last shot
 			StringBuffer currLine = new StringBuffer("");
@@ -254,14 +275,35 @@ public class Jenny {
 			if (x<14 && y<14 && x>=0 && y>=0) {
 				temp = status.battlefield[x][y];
 				switch (temp.condition) {
-				case Const.UNKNOWN:
-				case Const.ENEMY_SHIP:
-				case Const.NEXT_ROUND_SHOT: temp.condition = Const.PROBABLY_BLANK; break;
+				case Const.UNKNOWN: 
+					temp.condition = Const.PROBABLY_BLANK; 
+					temp.priority = Const.PRIOR_MIN;
+					break;  //unknown from system input
 				}
 			}
 		}
-		
 	}
+	
+	private static void makeNearestNextShot(Sector sector) {
+		int x = sector.xPos, y = sector.yPos;
+		Sector near;  //        north      east       south      west
+		int[][] nearest = { { x-1, y }, { x,y+1 }, { x+1,y }, { x,y-1 } }; 
+		for (int i = 0; i<nearest.length; i++) {
+			x = nearest[i][0];
+			y = nearest[i][1];
+			if (x<14 && y<14 && x>=0 && y>=0) {
+				near = status.battlefield[x][y];
+				if (near.condition == Const.UNKNOWN) { //unknown from system input
+					if (near.priority > Const.PRIOR_MIN) {
+						near.priority = Const.PRIOR_SOON;
+						near.condition = Const.NEXT_ROUND_SHOT;
+					}
+				//case Const.NEXT_ROUND_SHOT: temp.condition = Const.PROBABLY_BLANK; break;
+				}
+			}
+		}		
+	}
+	
 	private static ActualStatus loadStatus() {
 		BufferedReader br = null;
 		ActualStatus status = new ActualStatus();

@@ -17,6 +17,13 @@ public interface Const {
 	public static final int PRIOR_UNKNOWN = 50;
 	public static final int PRIOR_SOON = 80;
 	public static final int PRIOR_MAX = 100;
+	public static final int PRIOR_FIRSTLEVEL = 75;
+	public static final int PRIOR_SECONDLEVEL = 70;
+	public static final int PRIOR_THIRDLEVEL = 65;
+	public static final int PRIOR_FOURTHLEVEL = 60;
+	public static final int PRIOR_FINESTLEVEL = 55;  //grid that finds everything
+	public static final int PRIOR_LASTLEVEL = 50;  //every sector
+	
 	
 	public static final char SHOT = 'm';
 	public static final char BOMB = 'b';

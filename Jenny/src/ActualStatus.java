@@ -11,7 +11,6 @@ public class ActualStatus {
 			new Sector[StatusConsts.SECTOR_SIZE][StatusConsts.SECTOR_SIZE];
 	
 	//status variables:
-	public Sector enemyJustHit = null;
 	
 	
 	public int[] findAirstrikePos(){
