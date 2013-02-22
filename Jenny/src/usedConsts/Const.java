@@ -17,4 +17,14 @@ public interface Const {
 	public static final int PRIOR_UNKNOWN = 50;
 	public static final int PRIOR_SOON = 80;
 	public static final int PRIOR_MAX = 100;
+	
+	public static final char SHOT = 'm';
+	public static final char BOMB = 'b';
+	public static final char TORPEDO = 't';
+	public static final char FIREWORK = 'f';
+	
+	public static final char TORPEDO_UP = 'u';
+	public static final char TORPEDO_RIGHT = 'r';
+	public static final char TORPEDO_DOWN = 'd';
+	public static final char TORPEDO_LEFT = 'l';
 }

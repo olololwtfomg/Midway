@@ -9,11 +9,9 @@ public class Sector {
 	
 	int xPos = 0;
 	int yPos = 0;
-	
-	//1 for own ship, 2 for enemy ship
-	//3 for unknown shot, 4 for own shot, 5 for enemy shot
-	//6 for ally ship hit, 7 for enemy ship hit,
-	//8 for lowest priority, 9 for high priority, 0 for unknown
+	char action = '0'; //for trading to main
+	char torpedoDir = '0';
+
 	int condition = 0;
 	int priority = 50;  //0 - 100 ... 0 for blank, 50 standard shot, 80 high priority
 	
