@@ -74,6 +74,7 @@ public class Jenny {
 			if (!file.isFile()) {
 				System.err.println("Log neexistuje.");
 				//log is broken ... create new based on system input
+				return;
 			}
 			br = new BufferedReader(new FileReader(file));
 			currentLine = br.readLine(); //round
