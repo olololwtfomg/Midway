@@ -9,8 +9,7 @@ BIN_DIR = bin2/
 Jenny:
 	mkdir $(BIN_DIR)
 	$(JC) -d $(BIN_DIR) $(JFLAGS) $(SRC_DIR)*.java $(SRC_DIR)$(CONST_SRC)*.java
-	cp -rf $(BIN_DIR)* .
-	chmod u+x Jenny_run
+	cp -rf $(BIN_Dir)*
 	
 clean:
 	rm -rf $(BIN_DIR)
