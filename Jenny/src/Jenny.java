@@ -9,9 +9,9 @@ import usedConsts.Const;
 
 public class Jenny {
 	static ActualStatus status;
-	
-	private static final String INPUT_FILE_PATH = ".%ssrc%<sbattlefield.txt";
-	private static final String LOG_FILE_PATH = ".%ssrc%<slog.txt";
+
+	private static final String INPUT_FILE_PATH = ".%sbattlefield.txt";
+	private static final String LOG_FILE_PATH = ".%slog.txt";
 	private static final String WIN_PATH_SEP = "\\";
 	private static final String UNIX_PATH_SEP = "/";
 
@@ -25,21 +25,20 @@ public class Jenny {
 		status = loadStatus();
 		loadLog(status);
 		Sector shot = Strategies.doSomeLogic(status);
+		if (shot == null) System.err.println("Fatal error: no result to execute.");
 		String lastWord = "";
-		if (shot.action != '0') {
-			switch (shot.action) {
-			case Const.BOMB:
-				break;
-			case Const.TORPEDO:
-				break;
-			case Const.FIREWORK:
-				break;
-			case Const.SHOT:
-			default:
-				lastWord = String.format("%c [%d] [%d]", Const.SHOT, shot.xPos, shot.yPos);
-				shot.condition = Const.OUR_SHOT;
-				break;
-			}
+		switch (shot.action) {
+		case Const.BOMB:
+			break;
+		case Const.TORPEDO:
+			break;
+		case Const.FIREWORK:
+			break;
+		case Const.SHOT:
+		default:
+			lastWord = String.format("%c [%d] [%d]", Const.SHOT, shot.xPos, shot.yPos);
+			shot.condition = Const.OUR_SHOT;
+			break;
 		}
 		saveStatusToLog(shot);
 		System.out.println(lastWord);
@@ -50,10 +49,10 @@ public class Jenny {
 		status.print_heuristics();
 		int position[]=status.findAirstrikePos();
 		System.out.println("launch airstrike on position x"+position[0]+"y"+position[1]);
-		*/
+		 */
 
 	}
-	
+
 	private static void loadLog(ActualStatus status) { loadLog(status, false); }
 	private static void loadLog(ActualStatus status, boolean badInputFile) {
 		BufferedReader br = null;
@@ -78,21 +77,25 @@ public class Jenny {
 			}
 			br = new BufferedReader(new FileReader(file));
 			currentLine = br.readLine(); //round
-			
+
 			currentLine = br.readLine(); //initialize priorities for system input
 			String[] splitLine = currentLine.split("[^0-9]+");
+			
 			int priorityIndex = 0;
 			Sector actual;
 			SectorIterator iterator = new SectorIterator(status);
 			while ((actual = iterator.nextSector()) != null) {
 				if (actual.condition == Const.UNKNOWN) {
-					actual.priority = Integer.parseInt(splitLine[priorityIndex++]);
+					if (splitLine.length > priorityIndex) {
+					actual.priority = Integer.parseInt(splitLine[priorityIndex]);
+					priorityIndex++;
+					} else actual.priority = Const.PRIOR_UNKNOWN;  //if the log priorities are not good enough
 				}
 			}
-			
+
 			currentLine = br.readLine(); //last move
 			int priorTemp = 0;
-			
+
 			int battlefieldRow = 0;
 			int logCondition = 0;
 			while ((currentLine = br.readLine()) != null) {
@@ -101,7 +104,7 @@ public class Jenny {
 						logCondition = parseStatus(currentLine.charAt(column));
 						if (!badInputFile) {  
 							compareBeforeNowSector(status.battlefield[battlefieldRow][column], logCondition);
-							
+
 						} else {  //nebol spravne nacitany input ... ziadne nove informacie o battlefield
 							switch (logCondition) {
 							case Const.PROBABLY_BLANK: priorTemp = Const.PRIOR_MIN; break;
@@ -131,7 +134,7 @@ public class Jenny {
 
 		}
 	}
-	
+
 	private static void compareBeforeNowSector(Sector sector, int log) {
 		int input = sector.condition; //status from actual input
 		if (input == Const.ALLY_SHIP) {  //its ally ship there
@@ -155,7 +158,7 @@ public class Jenny {
 			}
 		} else if (input == Const.ALLY_SUNK) {  //ally ship sunken
 			if (log == Const.ALLY_SHIP) {
-				 //enemy new hit
+				//enemy new hit
 			}
 		} else if (input == Const.ENEMY_SUNK) {  //enemy ship sunken
 			switch (log) {
@@ -174,8 +177,15 @@ public class Jenny {
 			}
 		} else if (input == Const.UNKNOWN) {  //unknown - in log is our logic
 			switch (log) {
+			case Const.ALLY_SHIP:
+			case Const.OUR_SHOT:
+			case Const.ENEMY_SHOT:
+			case Const.ALLY_SUNK:
+			case Const.ENEMY_SUNK:
+				sector.condition = log;  //problems with system input - loadead from default
+				break;
 			case Const.ENEMY_SHIP:  
-				
+
 				//initialize priority from log
 				break;
 			case Const.PROBABLY_BLANK:  
@@ -193,7 +203,7 @@ public class Jenny {
 		//6 for ally ship hit, 7 for enemy ship hit,
 		//8 for lowest priority, 9 for high priority, 0 for unknown
 	}
-	
+
 	private static boolean saveStatusToLog(Sector lastShot) {
 		String logFileName;
 		switch(Jenny.os_type)
@@ -222,15 +232,16 @@ public class Jenny {
 		BufferedWriter bw = null;
 		try {
 			bw = new BufferedWriter(new FileWriter(file));
-			bw.write(++status.round + "\n");  //round
-			
+			bw.write( Integer.toString(++status.round));  //round
+			bw.newLine();
+
 			//priorities
 			SectorIterator iterator = new SectorIterator(status);
 			StringBuffer prioritiesLine = new StringBuffer();
 			Sector actual;
 			while ((actual = iterator.nextSector()) != null) {
 				switch (actual.condition) {
-				case Const.ENEMY_SHIP: 
+				case Const.ENEMY_SHIP:
 				case Const.NEXT_ROUND_SHOT:
 				case Const.UNKNOWN:
 				case Const.PROBABLY_BLANK:
@@ -238,10 +249,12 @@ public class Jenny {
 					break;
 				}
 			}
-			bw.write(prioritiesLine.toString() + "\n");  
-			
-			if (lastShot == null) { bw.newLine(); }
-			else { bw.write(" " + "\n"); } //last shot
+			bw.write(prioritiesLine.toString());
+			bw.newLine();
+
+			if (lastShot != null) bw.write(" "); //last shot
+			bw.newLine();
+		
 			StringBuffer currLine = new StringBuffer("");
 			for (int row = 0; row<status.battlefield.length; row++) {
 				for (int column = 0; column<status.battlefield[row].length; column++) {
@@ -284,7 +297,7 @@ public class Jenny {
 			}
 		}
 	}
-	
+
 	private static void makeNearestNextShot(Sector sector) {
 		int x = sector.xPos, y = sector.yPos;
 		Sector near;  //        north      east       south      west
@@ -299,12 +312,12 @@ public class Jenny {
 						near.priority = Const.PRIOR_SOON;
 						near.condition = Const.NEXT_ROUND_SHOT;
 					}
-				//case Const.NEXT_ROUND_SHOT: temp.condition = Const.PROBABLY_BLANK; break;
+					//case Const.NEXT_ROUND_SHOT: temp.condition = Const.PROBABLY_BLANK; break;
 				}
 			}
 		}		
 	}
-	
+
 	private static ActualStatus loadStatus() {
 		BufferedReader br = null;
 		ActualStatus status = new ActualStatus();
@@ -324,10 +337,18 @@ public class Jenny {
 		try {	//nacitanie zo suboru
 			File file = new File(logFileName);
 			if (!file.isFile()) {
-				return null;
-				////////////////////////////////////////////////
-				////////////load status from log
-				////////////////////////////////////////////////				
+
+				System.err.println("System input file not found. Loaded default status.");
+				//create default status
+				status.side = 1;
+				status.roundsToEnd = 140;
+				status.specialShots = 10;
+				for (int row = 0; row<status.battlefield.length;row++) {
+					for (int column = 0; column<status.battlefield[row].length; column++) {
+						status.battlefield[row][column] = new Sector(Const.UNKNOWN,Const.PRIOR_UNKNOWN,row,column);
+					}
+				}
+				return status;
 			}
 			br = new BufferedReader(new FileReader(file));
 			currentLine = br.readLine();
@@ -405,7 +426,7 @@ public class Jenny {
 		}
 		return condition;
 	}
-	
+
 	/*
 		for (int row = 0; row<status.battlefield.length;row++) {
 			for (int column = 0; column<status.battlefield[0].length;column++) {

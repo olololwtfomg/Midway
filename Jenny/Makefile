@@ -2,7 +2,7 @@ JC = javac
 
 SRC_DIR = src/
 CONST_SRC = usedConsts/
-BIN_DIR = bin2/
+BIN_DIR = bin/
 
 #JFLAGS = -cp $(BIN_DIR)$(CONST_SRC)
 

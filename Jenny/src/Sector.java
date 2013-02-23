@@ -13,7 +13,7 @@ public class Sector {
 	char torpedoDir = '0';
 
 	int condition = 0;
-	int priority = 50;  //0 - 100 ... 0 for blank, 50 standard shot, 80 high priority
+	int priority = Const.UNKNOWN;  //0 - 100 ... 0 for blank, 50 standard shot, 80 high priority
 	
 	int heurValue= 0; //for heuristics
 
@@ -26,7 +26,10 @@ public class Sector {
 		this.yPos = y;
 	}
 	public Sector(int condition, int priority, int x, int y) {
-		
+		this.condition = condition;
+		this.priority = priority;
+		this.xPos = x;
+		this.yPos = y;
 	}
 
 	public void setPosition(int x, int y) {
