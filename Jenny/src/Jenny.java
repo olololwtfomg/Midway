@@ -36,7 +36,7 @@ public class Jenny {
 			break;
 		case Const.SHOT:
 		default:
-			lastWord = String.format("%c [%d] [%d]", Const.SHOT, shot.xPos, shot.yPos);
+			lastWord = String.format("%c %d %d", Const.SHOT, shot.xPos, shot.yPos);
 			shot.condition = Const.OUR_SHOT;
 			break;
 		}

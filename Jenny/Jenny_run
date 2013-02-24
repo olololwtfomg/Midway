@@ -1,2 +1,2 @@
 #!/bin/bash
-java Jenny
+java Jenny 2> chybove_hlasky.txt
