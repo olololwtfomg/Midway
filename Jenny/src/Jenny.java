@@ -76,7 +76,6 @@ public class Jenny {
 				return;
 			}
 			br = new BufferedReader(new FileReader(file));
-			currentLine = br.readLine(); //round
 
 			currentLine = br.readLine(); //initialize priorities for system input
 			String[] splitLine = currentLine.split("[^0-9]+");
@@ -103,7 +102,7 @@ public class Jenny {
 					for (int column = 0; column< currentLine.length() && column<15; column++) {
 						logCondition = parseStatus(currentLine.charAt(column));
 						if (!badInputFile) {  
-							compareBeforeNowSector(status.battlefield[battlefieldRow][column], logCondition);
+							compareBeforeNowSector(status.battlefield[column][battlefieldRow], logCondition);
 
 						} else {  //nebol spravne nacitany input ... ziadne nove informacie o battlefield
 							switch (logCondition) {
@@ -232,8 +231,6 @@ public class Jenny {
 		BufferedWriter bw = null;
 		try {
 			bw = new BufferedWriter(new FileWriter(file));
-			bw.write( Integer.toString(++status.round));  //round
-			bw.newLine();
 
 			//priorities
 			SectorIterator iterator = new SectorIterator(status);
@@ -258,7 +255,7 @@ public class Jenny {
 			StringBuffer currLine = new StringBuffer("");
 			for (int row = 0; row<status.battlefield.length; row++) {
 				for (int column = 0; column<status.battlefield[row].length; column++) {
-					currLine.append(status.battlefield[row][column].condition);
+					currLine.append(status.battlefield[column][row].condition);
 				}
 				bw.write(currLine.toString());
 				bw.newLine();
@@ -341,11 +338,11 @@ public class Jenny {
 				System.err.println("System input file not found. Loaded default status.");
 				//create default status
 				status.side = 1;
-				status.roundsToEnd = 140;
+				status.roundsToEnd = 150;
 				status.specialShots = 10;
 				for (int row = 0; row<status.battlefield.length;row++) {
 					for (int column = 0; column<status.battlefield[row].length; column++) {
-						status.battlefield[row][column] = new Sector(Const.UNKNOWN,Const.PRIOR_UNKNOWN,row,column);
+						status.battlefield[column][row] = new Sector(Const.UNKNOWN,Const.PRIOR_UNKNOWN,column,row);
 					}
 				}
 				return status;
@@ -356,10 +353,11 @@ public class Jenny {
 				splitLine = currentLine.split("[^0-9]+");
 				status.side = Integer.parseInt(splitLine[0]);
 				status.roundsToEnd = Integer.parseInt(splitLine[1]);
+				status.round = 151 - status.roundsToEnd;
 				status.specialShots = Integer.parseInt(splitLine[2]);
 			}
 			while ((currentLine = br.readLine()) != null) {
-				if (index<15 || currentLine.length() ==14) {
+				if (index<15 && currentLine.length() ==14) {
 					for (int column = 0; column<currentLine.length(); column++) {
 						status.battlefield[index][column] = new Sector(parseStatus(currentLine.charAt(column)) , index, column);
 					}
