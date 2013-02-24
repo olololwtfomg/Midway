@@ -36,7 +36,8 @@ public class Jenny {
 			break;
 		case Const.SHOT:
 		default:
-			lastWord = String.format("%c %d %d", Const.SHOT, shot.yPos, shot.xPos);
+
+			lastWord = String.format("%c %d %d", Const.SHOT, shot.xPos, shot.yPos);
 			shot.condition = Const.OUR_SHOT;
 			break;
 		}
@@ -97,21 +98,21 @@ public class Jenny {
 
 			int battlefieldRow = 0;
 			int logCondition = 0;
-			while ((currentLine = br.readLine()) != null) {
+			while ((currentLine = br.readLine()) != null) {  //posun na dalsi riadok
 				if (battlefieldRow<14) {
-					for (int column = 0; column< currentLine.length() && column<15; column++) {
+					for (int column = 0; column< currentLine.length() && column<15; column++) {  //prechod riadkom
 						logCondition = parseStatus(currentLine.charAt(column));
-						if (!badInputFile) {  
+						if (!badInputFile) {
 							compareBeforeNowSector(status.battlefield[column][battlefieldRow], logCondition);
 
-						} else {  //nebol spravne nacitany input ... ziadne nove informacie o battlefield
+						} else {  //nebol spravne nacitany input ... ziadne nove informacie z logu
 							switch (logCondition) {
 							case Const.PROBABLY_BLANK: priorTemp = Const.PRIOR_MIN; break;
 							case Const.UNKNOWN: priorTemp = Const.PRIOR_UNKNOWN; break;
 							case Const.NEXT_ROUND_SHOT: priorTemp = Const.PRIOR_SOON; break;
 							case Const.ENEMY_SHIP: priorTemp = Const.PRIOR_MAX; break;
 							}
-							status.battlefield[battlefieldRow][column] = new Sector(logCondition, priorTemp, battlefieldRow, column);
+							status.battlefield[column][battlefieldRow] = new Sector(logCondition, priorTemp, column, battlefieldRow);
 						}
 
 					}
@@ -248,18 +249,21 @@ public class Jenny {
 			}
 			bw.write(prioritiesLine.toString());
 			bw.newLine();
-
+			
+			/////////////////////////////////
+			////////////////////////////////
+			///////////////////////////////
+			
 			if (lastShot != null) bw.write(" "); //last shot
 			bw.newLine();
-		
-			StringBuffer currLine = new StringBuffer("");
+			StringBuffer currLine = null;
 			for (int row = 0; row<status.battlefield.length; row++) {
+				currLine = new StringBuffer();				
 				for (int column = 0; column<status.battlefield[row].length; column++) {
 					currLine.append(status.battlefield[column][row].condition);
 				}
 				bw.write(currLine.toString());
 				bw.newLine();
-				currLine.delete(0,currLine.length());
 			}
 		} catch (IOException e) {
 			System.err.println("Problem so zapisovanim logu.");
@@ -329,8 +333,6 @@ public class Jenny {
 			logFileName= String.format(INPUT_FILE_PATH,UNIX_PATH_SEP);
 			break;
 		}
-		int index = 0;
-		String[] splitLine;
 		try {	//nacitanie zo suboru
 			File file = new File(logFileName);
 			if (!file.isFile()) {
@@ -349,6 +351,7 @@ public class Jenny {
 			}
 			br = new BufferedReader(new FileReader(file));
 			currentLine = br.readLine();
+			String[] splitLine;
 			if (currentLine != null) {  //status line
 				splitLine = currentLine.split("[^0-9]+");
 				status.side = Integer.parseInt(splitLine[0]);
@@ -356,19 +359,20 @@ public class Jenny {
 				status.round = 151 - status.roundsToEnd;
 				status.specialShots = Integer.parseInt(splitLine[2]);
 			}
-			while ((currentLine = br.readLine()) != null) {
-				if (index<15 && currentLine.length() ==14) {
-					for (int column = 0; column<currentLine.length(); column++) {
-						status.battlefield[index][column] = new Sector(parseStatus(currentLine.charAt(column)) , index, column);
+			int battlefieldRow = 0;
+			while ((currentLine = br.readLine()) != null) {  //citanie riadkov
+				if (battlefieldRow<15 && currentLine.length() ==14) {  
+					for (int column = 0; column<currentLine.length(); column++) {  //citanie znakov v riadku
+						status.battlefield[column][battlefieldRow] = new Sector(parseStatus(currentLine.charAt(column)) , column, battlefieldRow);
 					}
-					index++;
+					battlefieldRow++;
 				} else {
-					System.err.println("Vstupny subor nema spravny format. Posledny riadok: " + (index - 1) + ", pocet znakov: " + currentLine.length());
-					index++;
+					System.err.println("Vstupny subor nema spravny format. Posledny riadok: " + (battlefieldRow + 1) + ", pocet znakov: " + currentLine.length());
+					battlefieldRow++;
 				}
 			}
-			if (index != 14) {
-				System.err.println("Vstupny subor nebol nacitany spravne posledny nacitany riadok: " + index);
+			if (battlefieldRow != 14) {
+				System.err.println("Vstupny subor nebol nacitany spravne posledny nacitany riadok: " + battlefieldRow);
 			}
 
 		} catch (IOException e) {
