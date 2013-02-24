@@ -7,8 +7,8 @@ public class Sector {
 	 * TODO: hodnoty podla pravdepodobnostneho modelu
 	 * */
 	
-	int xPos = 0;
-	int yPos = 0;
+	int xPos = 0;  //column
+	int yPos = 0;  //row
 	char action = '0'; //for trading to main
 	char torpedoDir = '0';
 
