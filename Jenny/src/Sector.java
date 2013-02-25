@@ -90,11 +90,17 @@ public class Sector {
 	boolean goodForBomb(ActualStatus status)
 	{
 		int x = this.xPos, y = this.yPos; 
-		if((status.battlefield[x][y].priority>=Const.PRIOR_SOON) &&
-				(status.battlefield[x][y+1].priority>=Const.PRIOR_SOON) &&
-				(status.battlefield[x+1][y].priority>=Const.PRIOR_SOON) &&
-				(status.battlefield[x+1][y+1].priority>=Const.PRIOR_SOON)){
-			return true;
+		try{
+			if((status.battlefield[x][y].priority>=Const.PRIOR_LASTLEVEL) &&
+					(status.battlefield[x][y+1].priority>=Const.PRIOR_LASTLEVEL) &&
+					(status.battlefield[x+1][y].priority>=Const.PRIOR_LASTLEVEL) &&
+					(status.battlefield[x+1][y+1].priority>=Const.PRIOR_LASTLEVEL)){
+				return true;
+			}
+		}
+		catch (IndexOutOfBoundsException e)
+		{
+			return false;
 		}
 		return false;
 	}
