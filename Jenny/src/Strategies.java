@@ -18,14 +18,6 @@ public class Strategies {
 		SectorIterator iterator = new SectorIterator(status);
 		Sector actual;
 		List<Sector> list =findSectors(Const.PRIOR_SOON);
-		/*
-		List<Sector> list = new ArrayList<Sector>();
-		while ((actual = iterator.nextSector()) != null) {  //najdenie sektorov ktore maju vyssiu prioritu
-			if (actual.priority >= Const.PRIOR_SOON) {
-				list.add(actual);
-			}
-		}
-		*/
 		if (list.size()>0) return selectRandomFromList(list);
 		iterator.reset();
 		int minLevel = 5;  //cislo minimalnej urovne ktorej bunky boli najdene
@@ -98,6 +90,29 @@ public class Strategies {
 			}
 		}
 		return list;
+	}
+	
+	private static Sector selectBombPos(List<Sector> list)
+	{
+		Sector actual=null;
+		List<Sector> goodPositions=new ArrayList<Sector>();
+		int length=list.size();
+		if(status.specialShots>0)
+		{
+			for (int currSector=0;currSector<length;currSector++)
+			{
+				actual=list.get(currSector);
+				if (actual.goodForBomb(status))
+				{
+					goodPositions.add(actual);
+				}
+				else 
+				{
+					actual =null;
+				}
+			}
+		}
+		return actual;
 	}
 
 	private static Sector selectRandomFromList(List<Sector> list) {
