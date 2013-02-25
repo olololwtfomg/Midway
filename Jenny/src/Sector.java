@@ -89,10 +89,8 @@ public class Sector {
 	
 	boolean goodForBomb(ActualStatus status)
 	{
-		int x = this.xPos, y = this.yPos;
-		Sector near;  //        north      south     west       east
-		int[][] nearest = { { x,y}, { x,y+1 }, { x+1,y }, { x+1,y+1 } }; 
-		if((status.battlefield[x][y].priority>Const.PRIOR_SOON) &&
+		int x = this.xPos, y = this.yPos; 
+		if((status.battlefield[x][y].priority>=Const.PRIOR_SOON) &&
 				(status.battlefield[x][y+1].priority>=Const.PRIOR_SOON) &&
 				(status.battlefield[x+1][y].priority>=Const.PRIOR_SOON) &&
 				(status.battlefield[x+1][y+1].priority>=Const.PRIOR_SOON)){

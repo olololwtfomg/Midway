@@ -18,7 +18,15 @@ public class Strategies {
 		SectorIterator iterator = new SectorIterator(status);
 		Sector actual;
 		List<Sector> list =findSectors(Const.PRIOR_SOON);
-		if (list.size()>0) return selectRandomFromList(list);
+		if (list.size()>0)
+		{
+			if ((actual=selectBombPos(list))==null){
+				return selectRandomFromList(list);
+			}
+			else{
+				return actual;
+			}
+		}
 		iterator.reset();
 		int minLevel = 5;  //cislo minimalnej urovne ktorej bunky boli najdene
 
@@ -72,7 +80,12 @@ public class Strategies {
 				}
 			}
 		}
-		return selectRandomFromList(list);
+		if ((actual=selectBombPos(list))==null){
+			return selectRandomFromList(list);
+		}
+		else{
+			return actual;
+		}
 	}
 
 	private static boolean isSectorKnown(Sector sector) {
@@ -106,13 +119,16 @@ public class Strategies {
 				{
 					goodPositions.add(actual);
 				}
-				else 
-				{
-					actual =null;
-				}
 			}
 		}
-		return actual;
+		if (goodPositions.size()>0){
+			actual=selectRandomFromList(goodPositions);
+			actual.action=Const.BOMB;
+			return actual;
+		}
+		else{ 
+			return null;
+		}
 	}
 
 	private static Sector selectRandomFromList(List<Sector> list) {
