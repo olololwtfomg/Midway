@@ -23,6 +23,9 @@ public class Jenny {
 	private static OS_type os_type=OS_type.LINUX;
 
 	public static void main(String[] args) {
+		/////////////////////////////////////////////////////
+		Stopwatch watch = new Stopwatch(true);///////////////////
+		/////////////////////////////////////////////////////
 		loadLog(loadStatus());
 		Sector shotSector = Strategies.doSomeLogic(status);
 		if (shotSector == null) System.err.println("Fatal error: no result to execute.");
@@ -41,6 +44,7 @@ public class Jenny {
 			break;
 		}
 		saveStatusToLog(shotSector);
+		if (Const.TIMER) System.err.println("ROUND " + status.round + " Time: " + (watch.actualTime()/1000000) + "ms."); 
 		System.out.println(lastWord);
 		//System.out.format("%s [%d] [%d]", shot.)
 		//System.out.format("%s [%d] [%d] %c",

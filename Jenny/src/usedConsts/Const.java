@@ -1,6 +1,8 @@
 package usedConsts;
 
 public interface Const {
+	public static final boolean TIMER = true;
+	
 	public static final int ALLY_SHIP=1;
 	public static final int ENEMY_SHIP=2;  //status for max priority
 	public static final int SOME_SHOT=3;
