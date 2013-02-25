@@ -15,21 +15,12 @@ public class Strategies {
 	}
 
 	private static Sector defaultStrategy() {
+		List<Sector> list = findSectors(Const.PRIOR_SOON);
+		if (list.size()>0) return selectRandomFromList(list);
+		int minLevel = 5;  //cislo minimalnej urovne ktorej bunky boli najdene
+		
 		SectorIterator iterator = new SectorIterator(status);
 		Sector actual;
-		List<Sector> list =findSectors(Const.PRIOR_SOON);
-		/*
-		List<Sector> list = new ArrayList<Sector>();
-		while ((actual = iterator.nextSector()) != null) {  //najdenie sektorov ktore maju vyssiu prioritu
-			if (actual.priority >= Const.PRIOR_SOON) {
-				list.add(actual);
-			}
-		}
-		*/
-		if (list.size()>0) return selectRandomFromList(list);
-		iterator.reset();
-		int minLevel = 5;  //cislo minimalnej urovne ktorej bunky boli najdene
-
 		while((actual = iterator.nextSector()) != null) {
 			if (isSectorKnown(actual)) continue;
 
@@ -41,7 +32,7 @@ public class Strategies {
 					list.clear();
 					minLevel = 1;
 				}
-				actual.priority = Const.PRIOR_FIRSTLEVEL;  //first level - max 16 shots
+//				actual.priority = Const.PRIOR_FIRSTLEVEL;  //first level - max 16 shots
 				list.add(actual);
 			}
 			else if (minLevel>1) {
@@ -50,7 +41,7 @@ public class Strategies {
 						list.clear();
 						minLevel = 2;
 					}
-					actual.priority = Const.PRIOR_SECONDLEVEL; //second level - max 25 shots
+//					actual.priority = Const.PRIOR_SECONDLEVEL; //second level - max 25 shots
 					list.add(actual);
 
 				}
@@ -60,7 +51,7 @@ public class Strategies {
 							list.clear();
 							minLevel = 3;
 						}
-						actual.priority = Const.PRIOR_THIRDLEVEL; //third level - max 25 shots
+//						actual.priority = Const.PRIOR_THIRDLEVEL; //third level - max 25 shots
 						list.add(actual);
 					}
 					if (minLevel>3) {
@@ -69,10 +60,10 @@ public class Strategies {
 								list.clear();
 								minLevel = 4;
 							}							
-							actual.priority = Const.PRIOR_FINESTLEVEL;
+//							actual.priority = Const.PRIOR_FINESTLEVEL;
 							list.add(actual);
 						} else {
-							actual.priority = Const.PRIOR_LASTLEVEL;  //max 35
+//							actual.priority = Const.PRIOR_LASTLEVEL;  //max 35
 							list.add(actual);
 						}
 						
@@ -84,7 +75,7 @@ public class Strategies {
 	}
 
 	private static boolean isSectorKnown(Sector sector) {
-		return sector.condition != Const.UNKNOWN && sector.condition != Const.NEXT_ROUND_SHOT && sector.condition != Const.PROBABLY_BLANK && sector.condition != Const.ENEMY_SHIP;
+		return sector.condition != Const.UNKNOWN && sector.condition != Const.NEXT_ROUND_SHOT && sector.condition != Const.ENEMY_SHIP;
 	}
 	
 	private static List<Sector> findSectors(int prioLevel)

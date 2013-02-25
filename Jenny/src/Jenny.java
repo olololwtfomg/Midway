@@ -72,6 +72,15 @@ public class Jenny {
 			if (!file.isFile()) {
 				System.err.println("Log neexistuje.");
 				//log is broken ... create new based on system input
+				
+				//set blank near our ships
+				Sector actual;
+				SectorIterator iterator = new SectorIterator(status);
+				while ((actual = iterator.nextSector()) != null) {
+					if (actual.getCondition() == Const.ALLY_SHIP) {
+						actual.makeNearestBlank(status);
+					}
+				}
 				return;
 			}
 			br = new BufferedReader(new FileReader(file));
@@ -106,7 +115,7 @@ public class Jenny {
 							compareInputVSLog(status.battlefield[column][battlefieldRow], logCondition);
 
 						} else {  //nebol spravne nacitany input ... ziadne nove informacie z logu
-							System.err.println("Nenacitany log v kole: " + status.round);
+							System.err.println("Nenacitany system input file v kole: " + status.round);
 							switch (logCondition) {
 							case Const.PROBABLY_BLANK: priorTemp = Const.PRIOR_MIN; break;
 							case Const.UNKNOWN: priorTemp = Const.PRIOR_UNKNOWN; break;
@@ -137,9 +146,9 @@ public class Jenny {
 	}
 
 	private static void compareInputVSLog(Sector sector, int log) {
-		int input = sector.condition; //status from actual input
+		int input = sector.getCondition(); //status from actual input
 		if (input == Const.ALLY_SHIP) {  //its ally ship there
-			makeNearestBlank(sector);
+			sector.makeNearestBlank(status);
 		} else if (input == Const.SOME_SHOT) {  //someone shot, no hit
 			switch (log) {  //before:
 			case Const.ENEMY_SHIP:
@@ -183,26 +192,21 @@ public class Jenny {
 			case Const.ENEMY_SHOT:
 			case Const.ALLY_SUNK:
 			case Const.ENEMY_SUNK:
-				sector.condition = log;  //problems with system input - loadead from default
+				sector.setCondition(log);  //problems with system input - loadead from default
 				break;
 			case Const.ENEMY_SHIP:  
-
-				//initialize priority from log
+				sector.setCondition(log);
 				break;
-			case Const.PROBABLY_BLANK:  
-				//initialize priority from log
+			case Const.PROBABLY_BLANK:
+				sector.setCondition(log);
 				break;
 			case Const.NEXT_ROUND_SHOT:  
-				sector.condition = log;
+				sector.setCondition(log);
 				break;
 			default: //copy from input
 				break;
 			}
 		}
-		//1 for own ship, 2 for enemy ship
-		//3 for unknown shot, 4 for own shot, 5 for enemy shot
-		//6 for ally ship hit, 7 for enemy ship hit,
-		//8 for lowest priority, 9 for high priority, 0 for unknown
 	}
 
 	private static boolean saveStatusToLog(Sector lastShot) {
@@ -279,26 +283,6 @@ public class Jenny {
 		//System.err.println("Subor uspesne vytvoreny.");
 		return true;
 	}
-
-	private static void makeNearestBlank(Sector sector) {
-		int x = sector.xPos, y = sector.yPos;
-		Sector temp;  //        north      east       south      west      northeast   southeast     southwest    northwest
-		int[][] nearest = { { x-1, y }, { x,y+1 }, { x+1,y }, { x,y-1 }, { x-1,y+1 }, { x+1, y+1 }, { x+1, y-1 }, {x-1, y-1} }; 
-		for (int i = 0; i<nearest.length; i++) {
-			x = nearest[i][0];
-			y = nearest[i][1];
-			if (x<14 && y<14 && x>=0 && y>=0) {
-				temp = status.battlefield[x][y];
-				switch (temp.condition) {
-				case Const.UNKNOWN: 
-					temp.condition = Const.PROBABLY_BLANK; 
-					temp.priority = Const.PRIOR_MIN;
-					break;  //unknown from system input
-				}
-			}
-		}
-	}
-
 
 	private static boolean loadStatus() {
 		BufferedReader br = null;

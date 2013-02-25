@@ -13,7 +13,7 @@ public class Sector {
 	char torpedoDir = '0';
 
 	int condition = 0;
-	int priority = Const.UNKNOWN;  //0 - 100 ... 0 for blank, 50 standard shot, 80 high priority
+	int priority = Const.PRIOR_UNKNOWN;  //0 - 100 ... 0 for blank, 50 standard shot, 80 high priority
 	
 	int heurValue= 0; //for heuristics
 
@@ -36,6 +36,12 @@ public class Sector {
 		this.xPos = x;
 		this.yPos = y;
 	}
+	public void setCondition(int newCondition) {
+		this.condition = newCondition;
+	}
+	public int getCondition() {
+		return this.condition;
+	}
 	public void setHeurValue(int value)
 	{
 		this.heurValue=value;
@@ -46,7 +52,7 @@ public class Sector {
 	}
 	public int getSpecialValue(){
 		int retval=0;
-		switch(this.condition)
+		switch(this.getCondition())
 		{
 		// TODO: heuristicke hodnoty pre jednotlive polia
 			case Const.ALLY_SHIP:
@@ -67,7 +73,7 @@ public class Sector {
 		return retval;
 	}
 	
-	void makeNearestNextShot(ActualStatus status) {
+	public void makeNearestNextShot(ActualStatus status) {
 		int x = this.xPos, y = this.yPos;
 		Sector near;  //        north      south     west       east
 		int[][] nearest = { { x,y-1 }, { x,y+1 }, { x-1,y }, { x+1,y } }; 
@@ -86,5 +92,24 @@ public class Sector {
 			}
 		}		
 	}
+	public void makeNearestBlank(ActualStatus status) {
+		int x = this.xPos, y = this.yPos;
+		Sector temp;  //        north      south     west       east
+		int[][] nearest = { { x,y-1 }, { x,y+1 }, { x-1,y }, { x+1,y }, { x-1,y+1 }, { x+1, y+1 }, { x+1, y-1 }, {x-1, y-1} }; 
+		for (int i = 0; i<nearest.length; i++) {
+			x = nearest[i][0];
+			y = nearest[i][1];
+			if (x<14 && y<14 && x>=0 && y>=0) {
+				temp = status.battlefield[x][y];
+				switch (temp.condition) {
+				case Const.UNKNOWN: 
+					temp.condition = Const.PROBABLY_BLANK; 
+					temp.priority = Const.PRIOR_MIN;
+					break;  //unknown from system input
+				}
+			}
+		}
+	}
+
 
 }
