@@ -12,11 +12,17 @@ Jenny:
 	cp -rf $(BIN_DIR)* .
 	chmod u+x Jenny_run
 	
+clean_logs:
+	rm log.txt
+	rm bflog.txt
+	
 clean:
 	rm -rf $(BIN_DIR)
 	rm *.class
 	rm -rf $(CONST_SRC)
-	rm $(SRC_DIR)/log.txt
+	#rm $(SRC_DIR)/log.txt
+	rm log.txt
+	rm bflog.txt
 
 #Constans:
 #	$(JC) -d $(BIN_DIR) $(SRC_DIR)$(CONST_SRC)*.java

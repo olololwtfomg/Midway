@@ -2,6 +2,7 @@ import usedConsts.StatusConsts;
 
 
 public class SectorIterator {
+	
 	private int iteratorIndex = 0;
 	private ActualStatus status;
 	

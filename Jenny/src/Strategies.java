@@ -18,14 +18,14 @@ public class Strategies {
 		SectorIterator iterator = new SectorIterator(status);
 		Sector actual;
 		List<Sector> list = new ArrayList<Sector>();
-		while ((actual = iterator.nextSector()) != null) {
+		while ((actual = iterator.nextSector()) != null) {  //najdenie sektorov ktore maju vyssiu prioritu
 			if (actual.priority >= Const.PRIOR_SOON) {
 				list.add(actual);
 			}
 		}
 		if (list.size()>0) return selectRandomFromList(list);
 		iterator.reset();
-		int minLevel = 5;
+		int minLevel = 5;  //cislo minimalnej urovne ktorej bunky boli najdene
 
 		while((actual = iterator.nextSector()) != null) {
 			if (isSectorKnown(actual)) continue;

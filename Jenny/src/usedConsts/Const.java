@@ -34,4 +34,6 @@ public interface Const {
 	public static final char TORPEDO_RIGHT = 'r';
 	public static final char TORPEDO_DOWN = 'd';
 	public static final char TORPEDO_LEFT = 'l';
+    
+	public static final int DEBUG_PERMIT = 1;  
 }
