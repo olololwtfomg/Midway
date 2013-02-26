@@ -121,24 +121,37 @@ public class Sector {
 		}
 	}
 	
-	public boolean goodForBomb(ActualStatus status)
+	public boolean goodForBomb(Sector targeted, ActualStatus status)
 	{
-		int x = this.xPos, y = this.yPos; 
-		System.err.println("In goodForBomb actual priority:"+this.priority);
-		try{
-			if((status.battlefield[x][y].priority>=Const.PRIOR_LASTLEVEL) &&
-					(status.battlefield[x][y+1].priority>=Const.PRIOR_LASTLEVEL) &&
-					(status.battlefield[x+1][y].priority>=Const.PRIOR_LASTLEVEL) &&
-					(status.battlefield[x+1][y+1].priority>=Const.PRIOR_LASTLEVEL)){
-				return true;
+		Sector currSector;
+		int x=targeted.getXPos();
+		int y=targeted.getYPos();
+		int votes=0;
+		int[][] nearest = { { x,y }, { x,y+1 }, { x,y+1 }, { x+1,y+1 } }; 
+		for (int i = 0; i<nearest.length; i++) {
+			x = nearest[i][0];
+			y = nearest[i][1];
+			currSector=status.battlefield[x][y];
+			switch(currSector.getCondition())
+			{
+				//proste ani za boha v tychto pripadoch
+				case Const.CONDITION_ALLY_SHIP:
+				case Const.CONDITION_ALLY_SUNK:
+					return false;
+				case Const.CONDITION_UNKNOWN:
+				case Const.CONDITION_BLANK:
+				case Const.CONDITION_ENEMY_SHIP:
+					votes++;
+				default:
+					votes+=0;
 			}
 		}
-		catch (IndexOutOfBoundsException e)
-		{
+		if (votes>=2){
+			return true;
+		}
+		else{
 			return false;
 		}
-		return false;
 	}
-
 
 }
