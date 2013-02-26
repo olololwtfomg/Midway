@@ -131,7 +131,13 @@ public class Sector {
 		for (int i = 0; i<nearest.length; i++) {
 			x = nearest[i][0];
 			y = nearest[i][1];
-			currSector=status.battlefield[x][y];
+			try{
+				currSector=status.battlefield[x][y];
+			}
+			catch (IndexOutOfBoundsException e)
+			{
+				continue;
+			}
 			switch(currSector.getCondition())
 			{
 				//proste ani za boha v tychto pripadoch
