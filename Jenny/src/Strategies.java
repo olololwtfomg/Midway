@@ -15,7 +15,7 @@ public class Strategies {
 		Sector actionSector;
 		char action = Const.ACTION_SHOT;
 		//if there is something with priority from previous round shot at it:
-		findSectors(Const.PRIOR_SOON);
+		findSectorsByCondition(Const.CONDITION_NEXT_SHOT);
 		if (list.size() > 0) {
 			actionSector = selectRandomFromList(); 
 			status.setAction(actionSector.getXPos(), actionSector.getYPos(),  action); 
@@ -85,8 +85,18 @@ public class Strategies {
 			}
 		}
 	}
+	
+	private static void findSectorsByCondition(int condition) {
+		SectorIterator iterator = new SectorIterator(status);
+		Sector actual;
+		while ((actual = iterator.nextSector()) != null) {
+			if (actual.getCondition() == condition) {
+				list.add(actual);
+			}
+		}
+	}
 
-	private static void findSectors(int prioLevel)
+	private static void findSectorsByPriority(int prioLevel)
 	{
 		SectorIterator iterator = new SectorIterator(status);
 		Sector actual;

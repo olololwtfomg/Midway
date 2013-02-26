@@ -15,7 +15,8 @@ public class Sector {
 
 	private int condition = 0;
 	private EnemyShip enemyShip;
-	private int priority = Const.PRIOR_UNKNOWN;  //0 - 100 ... 0 for blank, 50 standard shot, 80 high priority
+	private int priority = Const.PRIOR_MIN;  //0 - 100 ... 0 for blank, 50 standard shot, 80 high priority
+	//set priority only to unknown sectors ... condition is superior else (not secured in setstats)
 	
 	int heurValue= 0; //for heuristics
 

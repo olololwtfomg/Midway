@@ -52,6 +52,9 @@ public class ActualStatus {
 	public void setSector(int logCondition, int priorTemp, int column, int battlefieldRow) {
 		this.battlefield[column][battlefieldRow] = new Sector(logCondition, priorTemp, column, battlefieldRow);
 	}
+	public void setSector(int logCondition, int column, int battlefieldRow) {
+		this.battlefield[column][battlefieldRow] = new Sector(logCondition, column, battlefieldRow);
+	}
 
 	public List<Sector> getNeighbors(Sector home, int mode) {  //1 for linear, 2 linear+diagonal
 		if (!(mode == 1 || mode == 2)) {
@@ -74,7 +77,7 @@ public class ActualStatus {
 	public static void makeNextShot(List<Sector> list) {
 		if (list == null) return;
 		for (Sector actual: list) {
-			if (actual.getPriority() > Const.PRIOR_MIN && actual.getCondition() == Const.CONDITION_UNKNOWN) {
+			if (actual.getCondition() == Const.CONDITION_UNKNOWN) {
 				actual.setStats(Const.CONDITION_NEXT_SHOT, Const.PRIOR_SOON);
 				if (Const.DEBUG) System.err.println("Sector as next shot: x" + actual.getXPos() + " y" + actual.getYPos() + " set to priority " + actual.getPriority()); 
 			}

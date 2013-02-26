@@ -27,12 +27,9 @@ public class Jenny {
 		/////////////////////////////////////////////////////
 		Stopwatch watch = new Stopwatch(true);///////////////////
 		/////////////////////////////////////////////////////
-		loadStatus();
-		loadLog(false);
-		System.err.println("Tester: "+ status.getSector(3, 8).getPriority());
+		loadLog(loadStatus());
 
 		Strategies.doSomeLogic(status);
-		System.err.println("Sector saving priority: " + status.getSector(3, 8).getPriority());
 		saveStatusToLog();
 		if (Const.TIMER) System.err.println("ROUND " + status.round + " Time: " + (watch.actualTime()/1000000) + "ms."); 
 		System.out.println(status.getActionWord());
@@ -90,33 +87,23 @@ public class Jenny {
 				for (int column = 0; column< currentLine.length() && column<StatusConsts.SECTOR_SIZE; column++) {  //prechod riadkom
 					logCondition = parseCondition(currentLine.charAt(column));
 					if (!badInputFile) {
-						switch (logCondition) {  //load priority
-						case Const.CONDITION_ENEMY_SHIP:
-						case Const.CONDITION_NEXT_SHOT:
-						case Const.CONDITION_UNKNOWN:
-						case Const.CONDITION_BLANK:
-							if (priorityIndex < prioritiesLine.length) {
-								if (status.getSector(column, battlefieldRow).getPriority() == Const.PRIOR_UNKNOWN) {				
-								status.getSector(column, battlefieldRow).setStats(null, Integer.parseInt(prioritiesLine[priorityIndex]));
-								priorityIndex++;
-								}
-							}
+						//priority for unknowns
+						if (logCondition == Const.CONDITION_UNKNOWN && priorityIndex < prioritiesLine.length) {
+							status.getSector(column, battlefieldRow).setStats(null, Integer.parseInt(prioritiesLine[priorityIndex]));
+							priorityIndex++;
 						}
-						if (Const.HARD_DEBUG) System.err.println("ROUND " + status.getRound() + " Pocet priorit: " + prioritiesLine.length + " posledna priradena: " + priorityIndex);
-
+						
 						compareInputVSLog(status.getSector(column, battlefieldRow), logCondition);
-						
-						if (column == 3 && battlefieldRow == 8) System.err.println("Sector: "+ status.getSector(3, 8).getPriority());
-						
-					} else {  //nebol spravne nacitany input ... ziadne nove informacie z logu
+
+
+					} else {  //nebol spravne nacitany input ... ziadne nove informacie o hre ... prepisanie dat z logu
 						System.err.println("ROUND " + status.getRound() + "Nenacitany system input file.");
-						switch (logCondition) {
-						case Const.CONDITION_BLANK: priorTemp = Const.PRIOR_MIN; break;
-						case Const.CONDITION_UNKNOWN: priorTemp = Const.PRIOR_UNKNOWN; break;
-						case Const.CONDITION_NEXT_SHOT: priorTemp = Const.PRIOR_SOON; break;
-						case Const.CONDITION_ENEMY_SHIP: priorTemp = Const.PRIOR_MAX; break;
+						if (logCondition == Const.CONDITION_UNKNOWN) {
+							priorTemp = Const.PRIOR_UNKNOWN;
+							status.setSector(logCondition, priorTemp, column, battlefieldRow);
+						} else {
+							status.setSector(logCondition, column, battlefieldRow);
 						}
-						status.setSector(logCondition, priorTemp, column, battlefieldRow);
 					}
 
 				}
@@ -167,7 +154,7 @@ public class Jenny {
 			case Const.CONDITION_UNKNOWN:  //something destroyed enemy ship (special bomb/enemy)
 			case Const.CONDITION_OUR_SHOT:  //last shot succeded - continue in shoting around
 				ActualStatus.makeNextShot(status.getNeighbors(sector, 1) );
-				System.err.println("Control: "+ status.getSector(3, 8).getPriority());
+				System.err.println("Control: "+ status.getSector(3, 8).getCondition());
 				break;
 			case Const.CONDITION_BLANK:
 				break;
@@ -235,11 +222,8 @@ public class Jenny {
 			Sector actual;
 			while ((actual = iterator.nextSector()) != null) {
 				switch (actual.getCondition()) {
-				case Const.CONDITION_ENEMY_SHIP:
-				case Const.CONDITION_NEXT_SHOT:
 				case Const.CONDITION_UNKNOWN:
-				case Const.CONDITION_BLANK:
-					if (Const.HARD_DEBUG) System.err.println("Saving priority for x" + actual.getXPos() + " y" + actual.getYPos() + " to " + actual.getPriority());
+					if (Const.HARD_DEBUG) System.err.println("Saving priority for x" + actual.getXPos() + " y" + actual.getYPos() + " as " + actual.getPriority());
 					prioritiesLine.append(actual.getPriority() + " ");
 				}
 			}
