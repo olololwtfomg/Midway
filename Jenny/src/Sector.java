@@ -90,6 +90,7 @@ public class Sector {
 	boolean goodForBomb(ActualStatus status)
 	{
 		int x = this.xPos, y = this.yPos; 
+		System.err.println("In goodForBomb actual priority:"+this.priority);
 		try{
 			if((status.battlefield[x][y].priority>=Const.PRIOR_LASTLEVEL) &&
 					(status.battlefield[x][y+1].priority>=Const.PRIOR_LASTLEVEL) &&

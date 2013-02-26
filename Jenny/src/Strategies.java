@@ -122,6 +122,7 @@ public class Strategies {
 			}
 		}
 		if (goodPositions.size()>0){
+			System.err.println("in selectBombPos: found at least one");
 			actual=selectRandomFromList(goodPositions);
 			actual.action=Const.BOMB;
 			return actual;

@@ -29,6 +29,7 @@ public class Jenny {
 		String lastWord = "";
 		switch (shotSector.action) {
 		case Const.BOMB:
+			System.err.println("in main: case bomb");
 			lastWord = String.format("%c %d %d", Const.BOMB, shotSector.xPos, shotSector.yPos);
 			shotSector.condition = Const.OUR_SHOT;
 			break;
