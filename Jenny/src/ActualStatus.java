@@ -55,17 +55,17 @@ public class ActualStatus {
 
 	public List<Sector> getNeighbors(Sector home, int mode) {  //1 for linear, 2 linear+diagonal
 		if (!(mode == 1 || mode == 2)) {
-			System.err.println("ROUND " + this.getStats()[0] + " Bad parameter for getNeighbors: " + mode);
+			System.err.println("ROUND " + this.getRound() + " Bad parameter for getNeighbors: " + mode);
 			return null;
 		}
 		List<Sector> list = new ArrayList<Sector>();
-		//                          north                         south                     west                      east        
+		//                                  north                                  south                                west                                  east        
 		int[][] nearestPos = { { home.getXPos(),home.getYPos()-1 }, { home.getXPos(),home.getYPos()+1 }, { home.getXPos()-1,home.getYPos() }, { home.getXPos()+1,home.getYPos() }
-		//        northeast                    southeast                     southwest                   northwest
+		//        northeast                                   southeast                                southwest                               northwest
 		, {home.getXPos()+1,home.getYPos()-1}, { home.getXPos()+1, home.getYPos()+1 }, { home.getXPos()-1, home.getYPos()+1 }, { home.getXPos()-1, home.getYPos()+1 } };
 		for (int i = 0; i<mode*4; i++) {
 			if ( nearestPos[i][0] < 14 && nearestPos[i][0] >= 0 && nearestPos[i][1] <14 && nearestPos[i][1] >= 0) {
-				list.add(this.getSector(nearestPos[i][0], nearestPos[i][1]));
+				list.add(this.battlefield[nearestPos[i][0] ] [ nearestPos[i][1] ]);
 			}
 		}
 		return list.size() > 0 ? list : null;
@@ -73,9 +73,7 @@ public class ActualStatus {
 
 	public static void makeNextShot(List<Sector> list) {
 		if (list == null) return;
-		Sector actual;
-		for (int i = 0; i<list.size(); i++) {
-			actual = list.get(i);
+		for (Sector actual: list) {
 			if (actual.getPriority() > Const.PRIOR_MIN && actual.getCondition() == Const.CONDITION_UNKNOWN) {
 				actual.setStats(Const.CONDITION_NEXT_SHOT, Const.PRIOR_SOON);
 				if (Const.DEBUG) System.err.println("Sector as next shot: x" + actual.getXPos() + " y" + actual.getYPos() + " set to priority " + actual.getPriority()); 
@@ -83,8 +81,14 @@ public class ActualStatus {
 		}		
 	}
 
-	public int[] getStats() {
-		return new int[] { this.round,  this.specialShots, this.side };
+	public int getRound() {
+		return this.round;
+	}
+	public int getSpecialShots() {
+		return this.specialShots;
+	}
+	public int getSide() {
+		return this.side;
 	}
 
 	public boolean setAction(int x, int y, char shot) { return setAction(x, y, shot, '0'); }
