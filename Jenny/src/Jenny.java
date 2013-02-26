@@ -154,7 +154,6 @@ public class Jenny {
 			case Const.CONDITION_UNKNOWN:  //something destroyed enemy ship (special bomb/enemy)
 			case Const.CONDITION_OUR_SHOT:  //last shot succeded - continue in shoting around
 				ActualStatus.makeNextShot(status.getNeighbors(sector, 1) );
-				System.err.println("Control: "+ status.getSector(3, 8).getCondition());
 				break;
 			case Const.CONDITION_BLANK:
 				break;
