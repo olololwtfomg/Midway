@@ -10,15 +10,17 @@ public class Strategies {
 	private static ActualStatus status;
 	private static List<Sector> list = new ArrayList<Sector>();
 
-	public static Sector doSomeLogic(ActualStatus stats) {
+	public static void doSomeLogic(ActualStatus stats) {
 		status = stats;
+		Sector actionSector;
 		//if there is something with priority from previous round shot at it:
 		findSectors(Const.PRIOR_SOON);
-		if (list.size() > 0) {	return selectRandomFromList(); }
+		if (list.size() > 0) {	actionSector = selectRandomFromList(); }
 		
 		//default grid filling
 		gridFill();
-		return selectRandomFromList();
+		actionSector = selectRandomFromList();
+		status.setAction(actionSector.getXPos(), actionSector.getYPos(), Const.ACTION_SHOT);
 	}
 
 	private static void gridFill() {
@@ -89,7 +91,11 @@ public class Strategies {
 			}
 		}
 	}
-
+	
+	private static void findShips(boolean shipsFinall) {
+		
+	}
+	
 	private static Sector selectRandomFromList() {
 		Random rnd = new Random();
 		return list.get( rnd.nextInt(list.size()) );

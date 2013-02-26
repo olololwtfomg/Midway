@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.List;
+
 import usedConsts.Const;
 import usedConsts.Heuristic;
 
@@ -11,6 +14,7 @@ public class Sector {
 	int yPos = 0;  //row
 
 	int condition = 0;
+	private EnemyShip enemyShip;
 	int priority = Const.PRIOR_UNKNOWN;  //0 - 100 ... 0 for blank, 50 standard shot, 80 high priority
 	
 	int heurValue= 0; //for heuristics
@@ -29,15 +33,18 @@ public class Sector {
 		this.xPos = x;
 		this.yPos = y;
 	}
-
-	public void setCondition(int newCondition) {
-		this.condition = newCondition;
+	public int getXPos() {
+		return this.xPos;
+	}
+	public int getYPos() {
+		return this.yPos;
 	}
 	public int getCondition() {
 		return this.condition;
 	}
-	public void setPriority(int newPriority) {
-		this.priority = newPriority;
+	public void setStats(Integer newCondition, Integer newPriority) {
+		if (newCondition != null) this.condition = newCondition;
+		if (newPriority != null) this.priority = newPriority;
 	}
 	public int getPriority() {
 		return this.priority;
@@ -75,30 +82,26 @@ public class Sector {
 	}
 	
 	public boolean isSectorKnown() {
-		return this.condition != Const.UNKNOWN && this.condition != Const.NEXT_ROUND_SHOT && this.condition != Const.CONDITION_ENEMY_SHIP;
+		return this.getCondition() != Const.UNKNOWN && this.getCondition() != Const.NEXT_ROUND_SHOT && this.getCondition() != Const.CONDITION_ENEMY_SHIP;
 	}
 	public void shot() {
-		if (!this.isSectorKnown() || this.condition == Const.CONDITION_BLANK) { this.condition = Const.OUR_SHOT; }
+		if (!this.isSectorKnown() || this.condition == Const.CONDITION_BLANK) { this.setStats(Const.OUR_SHOT, null); }
 	}
-	public void makeNearestNextShot(ActualStatus status) {
-		int x = this.xPos, y = this.yPos;
-		Sector near;  //        north      south     west       east
-		int[][] nearest = { { x,y-1 }, { x,y+1 }, { x-1,y }, { x+1,y } }; 
-		for (int i = 0; i<nearest.length; i++) {
-			x = nearest[i][0];
-			y = nearest[i][1];
-			if (x<14 && y<14 && x>=0 && y>=0) {
-				near = status.battlefield[x][y];
-				if (near.condition == Const.UNKNOWN) { //unknown from system input
-					if (near.priority > Const.PRIOR_MIN) {
-						near.priority = Const.PRIOR_SOON;
-						near.condition = Const.NEXT_ROUND_SHOT;
-					}
-					//case Const.NEXT_ROUND_SHOT: temp.condition = Const.PROBABLY_BLANK; break;
-				}
-			}
-		}		
+	
+	public void setEnemyShip(EnemyShip enemyShip) {
+		this.enemyShip = enemyShip;
 	}
+	
+	public boolean isEnemyShip() {
+		return this.enemyShip != null;
+	}
+	
+	public List<Sector> getArroundEnemyShips(ActualStatus status) {
+		List<Sector> list = new ArrayList<Sector>();
+		
+		return list;
+	}
+	
 	public void makeNearestBlank(ActualStatus status) {
 		int x = this.xPos, y = this.yPos;
 		Sector temp;  //        north      south     west       east

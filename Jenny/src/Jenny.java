@@ -166,7 +166,7 @@ public class Jenny {
 				break;
 			case Const.UNKNOWN:  //something destroyed enemy ship (special bomb/enemy)
 			case Const.OUR_SHOT:  //last shot succeded - continue in shoting around
-				sector.makeNearestNextShot(status);
+				ActualStatus.makeNextShot(status.getNeighbors(sector, 1) );
 				break;
 			case Const.CONDITION_BLANK:
 				break;
@@ -182,16 +182,16 @@ public class Jenny {
 			case Const.ENEMY_SHOT:
 			case Const.ALLY_SUNK:
 			case Const.ENEMY_SUNK:
-				sector.setCondition(log);  //problems with system input - loadead from default
+				sector.setStats(log,null);  //problems with system input - loadead from default
 				break;
 			case Const.CONDITION_ENEMY_SHIP:  
-				sector.setCondition(log);
+				sector.setStats(log,null);
 				break;
 			case Const.CONDITION_BLANK:
-				sector.setCondition(log);
+				sector.setStats(log,null);
 				break;
 			case Const.NEXT_ROUND_SHOT:
-				sector.setCondition(log);
+				sector.setStats(log,null);
 				break;
 			default: //copy from input
 				break;

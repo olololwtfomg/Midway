@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.List;
+
 import usedConsts.Const;
 import usedConsts.StatusConsts;
 
@@ -42,6 +45,40 @@ public class ActualStatus {
 			}
 			}
 		return PosBest;
+	}
+	public Sector getSector(int x, int y) {
+		return this.battlefield[x][y];
+	}
+	
+	public List<Sector> getNeighbors(Sector home, int mode) {  //1 for linear, 2 linear+diagonal
+		if (!(mode == 1 || mode == 2)) {
+			System.err.println("ROUND " + this.getStats()[0] + " Bad parameter for getNeighbors: " + mode);
+			return null;
+		}
+		List<Sector> list = new ArrayList<Sector>();
+		    //                          north                         south                     west                      east        
+		int[][] nearestPos = { { home.xPos,home.yPos-1 }, { home.xPos,home.yPos+1 }, { home.xPos-1,home.yPos }, { home.xPos+1,home.yPos }
+			//        northeast                    southeast                     southwest                   northwest
+			, {home.xPos+1,home.yPos-1}, { home.xPos+1, home.yPos+1 }, { home.xPos-1, home.yPos+1 }, { home.xPos-1, home.yPos+1 } };
+		for (int i = 0; i<mode*4; i++) {
+			if ( nearestPos[i][0] < 14 && nearestPos[i][0] >= 0 && nearestPos[i][1] <14 && nearestPos[i][1] >= 0) {
+				list.add(this.getSector(nearestPos[i][0], nearestPos[i][1]));
+			}
+		}
+		return list.size() > 0 ? list : null;
+	}
+	
+	public static void makeNextShot(List<Sector> list) {
+		if (list == null) return;
+		for (int i = 1; i<=list.size(); i++) {
+			if (list.get(i).getPriority() > Const.PRIOR_MIN && list.get(i).getCondition() == Const.UNKNOWN) {
+					list.get(i).setStats(Const.NEXT_ROUND_SHOT, Const.PRIOR_SOON);
+			}
+		}		
+	}
+
+	public int[] getStats() {
+		return new int[] { this.round,  this.specialShots, this.side };
 	}
 	
 	public boolean setAction(int x, int y, char shot) { return setAction(x, y, shot, '0'); }
