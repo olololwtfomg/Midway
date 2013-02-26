@@ -1,7 +1,7 @@
 package usedConsts;
 
 public interface Const {
-	public static final boolean DEBUG = true;
+	public static final boolean DEBUG = false;
 	public static final boolean HARD_DEBUG = false;
 	public static final boolean TIMER = true;
 	
@@ -16,17 +16,16 @@ public interface Const {
 	public static final int CONDITION_NEXT_SHOT=9;  //high priority
 	public static final int CONDITION_UNKNOWN=0;  //possible for shot
 	
-	public static final int PRIORITY_DIFF = 10;
+	public static final int PRIORITY_DIFF = 5;
 	public static final int PRIOR_MIN = 0;
 	public static final int PRIOR_UNKNOWN = 50;
 	public static final int PRIOR_SOON = 80;
 	public static final int PRIOR_MAX = 100;
-	public static final int PRIOR_FIRSTLEVEL = 75;
-	public static final int PRIOR_SECONDLEVEL = 70;
-	public static final int PRIOR_THIRDLEVEL = 65;
-	public static final int PRIOR_FOURTHLEVEL = 60;
-	public static final int PRIOR_FINESTLEVEL = 55;  //grid that finds everything
-	public static final int PRIOR_LASTLEVEL = 50;  //every sector
+	public static final int PRIOR_FINESTLEVEL = PRIOR_UNKNOWN + PRIORITY_DIFF;  //grid that finds everything
+	public static final int PRIOR_FOURTHLEVEL = PRIOR_FINESTLEVEL + PRIORITY_DIFF;
+	public static final int PRIOR_THIRDLEVEL = PRIOR_FOURTHLEVEL + PRIORITY_DIFF;
+	public static final int PRIOR_SECONDLEVEL = PRIOR_THIRDLEVEL + PRIORITY_DIFF;
+	public static final int PRIOR_FIRSTLEVEL = PRIOR_SECONDLEVEL + PRIORITY_DIFF;
 	
 	
 	public static final char ACTION_SHOT = 'm';

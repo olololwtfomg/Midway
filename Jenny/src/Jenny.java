@@ -29,10 +29,10 @@ public class Jenny {
 		/////////////////////////////////////////////////////
 		loadStatus();
 		loadLog(false);
-		System.err.println("Sector 3, 8 priority: " + status.getSector(3, 8).getPriority());
-		System.err.println("Sector 2, 9 priority: " + status.getSector(2, 9).getPriority());
-		Strategies.doSomeLogic(status);
+		System.err.println("Tester: "+ status.getSector(3, 8).getPriority());
 
+		Strategies.doSomeLogic(status);
+		System.err.println("Sector saving priority: " + status.getSector(3, 8).getPriority());
 		saveStatusToLog();
 		if (Const.TIMER) System.err.println("ROUND " + status.round + " Time: " + (watch.actualTime()/1000000) + "ms."); 
 		System.out.println(status.getActionWord());
@@ -96,19 +96,20 @@ public class Jenny {
 						case Const.CONDITION_UNKNOWN:
 						case Const.CONDITION_BLANK:
 							if (priorityIndex < prioritiesLine.length) {
+								if (status.getSector(column, battlefieldRow).getPriority() == Const.PRIOR_UNKNOWN) {				
 								status.getSector(column, battlefieldRow).setStats(null, Integer.parseInt(prioritiesLine[priorityIndex]));
 								priorityIndex++;
-							} else {
-								System.err.println("ROUND " + status.getStats()[0] + " Error loading priorities from log. priorities.length = " + prioritiesLine.length);
-								status.getSector(column, battlefieldRow).setStats(null, Const.PRIOR_UNKNOWN);  //if the log priorities are not good enough
+								}
 							}
 						}
-						if (Const.HARD_DEBUG) System.err.println("ROUND " + status.getStats()[0] + " Pocet priorit: " + prioritiesLine.length + " posledna priradena: " + priorityIndex);
+						if (Const.HARD_DEBUG) System.err.println("ROUND " + status.getRound() + " Pocet priorit: " + prioritiesLine.length + " posledna priradena: " + priorityIndex);
 
 						compareInputVSLog(status.getSector(column, battlefieldRow), logCondition);
-						if (column == 3 && battlefieldRow == 8) System.err.println("Priority at 3 8: " + prioritiesLine[priorityIndex]);
+						
+						if (column == 3 && battlefieldRow == 8) System.err.println("Sector: "+ status.getSector(3, 8).getPriority());
+						
 					} else {  //nebol spravne nacitany input ... ziadne nove informacie z logu
-						System.err.println("ROUND " + status.getStats()[0] + "Nenacitany system input file.");
+						System.err.println("ROUND " + status.getRound() + "Nenacitany system input file.");
 						switch (logCondition) {
 						case Const.CONDITION_BLANK: priorTemp = Const.PRIOR_MIN; break;
 						case Const.CONDITION_UNKNOWN: priorTemp = Const.PRIOR_UNKNOWN; break;
@@ -166,7 +167,7 @@ public class Jenny {
 			case Const.CONDITION_UNKNOWN:  //something destroyed enemy ship (special bomb/enemy)
 			case Const.CONDITION_OUR_SHOT:  //last shot succeded - continue in shoting around
 				ActualStatus.makeNextShot(status.getNeighbors(sector, 1) );
-				System.err.println("Sector x" + (sector.getXPos()+1) + " y" + sector.getYPos() + " priority: "+ sector.getPriority());
+				System.err.println("Control: "+ status.getSector(3, 8).getPriority());
 				break;
 			case Const.CONDITION_BLANK:
 				break;
