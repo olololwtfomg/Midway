@@ -1,3 +1,4 @@
+import usedConsts.Const;
 import usedConsts.StatusConsts;
 
 public class ActualStatus {
@@ -6,6 +7,10 @@ public class ActualStatus {
 	public int round = 1;
 	public int roundsToEnd = 0;
 	public int specialShots = 10;
+	private int actionX;
+	private int actionY;
+	private char action;
+	private char torpedoDir;
 	public Sector[][] battlefield = 
 			new Sector[StatusConsts.SECTOR_SIZE][StatusConsts.SECTOR_SIZE];
 	
@@ -39,6 +44,46 @@ public class ActualStatus {
 		return PosBest;
 	}
 	
+	public boolean setAction(int x, int y, char shot) { return setAction(x, y, shot, '0'); }
+	public boolean setAction(int x, int y, char shot, char dir) {
+		this.actionX = x;
+		this.actionY = y;
+		this.action = shot;
+		this.torpedoDir = dir;
+		switch (shot) {
+		case Const.ACTION_BOMB:
+			if (this.specialShots==0) return false;
+			this.battlefield[this.actionX+1][this.actionY].shot();
+			this.battlefield[this.actionX][this.actionY+1].shot();
+			this.battlefield[this.actionX+1][this.actionY+1].shot();
+		case Const.ACTION_SHOT:
+			this.battlefield[this.actionX][this.actionY].shot();
+			return true;
+		case Const.ACTION_TORPEDO:
+			if (this.specialShots==0) return false;
+		case Const.ACTION_FIREWORK:
+			if (this.specialShots==0) return false;
+		default:
+			return false;
+		}
+	}
+	public String getActionWord() {
+		if (this.action == Const.ACTION_TORPEDO) {
+			return String.format("%c %d %d %c", this.action, this.actionX, this.actionY, this.torpedoDir);
+		}
+		else return String.format("%c %d %d", this.action, this.actionX, this.actionY);
+	}
+	
+	public Sector getActionPos() {
+		return this.battlefield[this.actionX][this.actionY];
+	}
+	public char getActionType() {
+		return this.action;
+	}
+	public char getTorpedoDirection() {
+		return this.torpedoDir;
+	}
+		
 	public void calculateHeuristics()
 	{
 		Sector currSector;

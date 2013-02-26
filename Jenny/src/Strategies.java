@@ -8,21 +8,27 @@ import usedConsts.Const;
 public class Strategies {
 
 	private static ActualStatus status;
+	private static List<Sector> list = new ArrayList<Sector>();
 
 	public static Sector doSomeLogic(ActualStatus stats) {
 		status = stats;
-		return defaultStrategy();
+		//if there is something with priority from previous round shot at it:
+		findSectors(Const.PRIOR_SOON);
+		if (list.size() > 0) {	return selectRandomFromList(); }
+		
+		//default grid filling
+		gridFill();
+		return selectRandomFromList();
 	}
 
-	private static Sector defaultStrategy() {
-		List<Sector> list = findSectors(Const.PRIOR_SOON);
-		if (list.size()>0) return selectRandomFromList(list);
+	private static void gridFill() {
+		
 		int minLevel = 5;  //cislo minimalnej urovne ktorej bunky boli najdene
 		
 		SectorIterator iterator = new SectorIterator(status);
 		Sector actual;
 		while((actual = iterator.nextSector()) != null) {
-			if (isSectorKnown(actual)) continue;
+			if (actual.isSectorKnown()) continue;
 
 			int xDiff = actual.xPos%3;
 			int yDiff = actual.yPos%3;
@@ -71,27 +77,20 @@ public class Strategies {
 				}
 			}
 		}
-		return selectRandomFromList(list);
 	}
 
-	private static boolean isSectorKnown(Sector sector) {
-		return sector.condition != Const.UNKNOWN && sector.condition != Const.NEXT_ROUND_SHOT && sector.condition != Const.ENEMY_SHIP;
-	}
-	
-	private static List<Sector> findSectors(int prioLevel)
+	private static void findSectors(int prioLevel)
 	{
 		SectorIterator iterator = new SectorIterator(status);
 		Sector actual;
-		List<Sector> list = new ArrayList<Sector>();
-		while ((actual = iterator.nextSector()) != null) {  //najdenie sektorov ktore maju vyssiu prioritu
-			if (actual.priority >= prioLevel) {
+		while ((actual = iterator.nextSector()) != null) {
+			if (actual.getPriority() >= prioLevel) {
 				list.add(actual);
 			}
 		}
-		return list;
 	}
 
-	private static Sector selectRandomFromList(List<Sector> list) {
+	private static Sector selectRandomFromList() {
 		Random rnd = new Random();
 		return list.get( rnd.nextInt(list.size()) );
 	}

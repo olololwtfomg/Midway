@@ -9,8 +9,6 @@ public class Sector {
 	
 	int xPos = 0;  //column
 	int yPos = 0;  //row
-	char action = '0'; //for trading to main
-	char torpedoDir = '0';
 
 	int condition = 0;
 	int priority = Const.PRIOR_UNKNOWN;  //0 - 100 ... 0 for blank, 50 standard shot, 80 high priority
@@ -32,15 +30,17 @@ public class Sector {
 		this.yPos = y;
 	}
 
-	public void setPosition(int x, int y) {
-		this.xPos = x;
-		this.yPos = y;
-	}
 	public void setCondition(int newCondition) {
 		this.condition = newCondition;
 	}
 	public int getCondition() {
 		return this.condition;
+	}
+	public void setPriority(int newPriority) {
+		this.priority = newPriority;
+	}
+	public int getPriority() {
+		return this.priority;
 	}
 	public void setHeurValue(int value)
 	{
@@ -50,22 +50,23 @@ public class Sector {
 	public int getHeurValue(){
 		return this.heurValue;
 	}
+	
 	public int getSpecialValue(){
 		int retval=0;
 		switch(this.getCondition())
 		{
 		// TODO: heuristicke hodnoty pre jednotlive polia
-			case Const.ALLY_SHIP:
+			case Const.CONDITION_ALLY_SHIP:
 			case Const.ALLY_SUNK: 
 				retval=Heuristic.OWN_SHIP; break;
-			case Const.ENEMY_SHIP: retval=Heuristic.ENEMY_SHIP; break;
-			case Const.SOME_SHOT: 
+			case Const.CONDITION_ENEMY_SHIP: retval=Heuristic.ENEMY_SHIP; break;
+			case Const.CONDITION_SOME_SHOT: 
 			case Const.ENEMY_SHOT: 
 			case Const.OUR_SHOT: 
 				retval=Heuristic.MISSED; break; 
 			case Const.ENEMY_SUNK: 
 				retval=Heuristic.HIT; break;
-			case Const.PROBABLY_BLANK:
+			case Const.CONDITION_BLANK:
 			case Const.UNKNOWN:
 			default:
 				retval=Heuristic.UNKNOWN;
@@ -73,6 +74,12 @@ public class Sector {
 		return retval;
 	}
 	
+	public boolean isSectorKnown() {
+		return this.condition != Const.UNKNOWN && this.condition != Const.NEXT_ROUND_SHOT && this.condition != Const.CONDITION_ENEMY_SHIP;
+	}
+	public void shot() {
+		if (!this.isSectorKnown() || this.condition == Const.CONDITION_BLANK) { this.condition = Const.OUR_SHOT; }
+	}
 	public void makeNearestNextShot(ActualStatus status) {
 		int x = this.xPos, y = this.yPos;
 		Sector near;  //        north      south     west       east
@@ -103,7 +110,7 @@ public class Sector {
 				temp = status.battlefield[x][y];
 				switch (temp.condition) {
 				case Const.UNKNOWN: 
-					temp.condition = Const.PROBABLY_BLANK; 
+					temp.condition = Const.CONDITION_BLANK; 
 					temp.priority = Const.PRIOR_MIN;
 					break;  //unknown from system input
 				}
