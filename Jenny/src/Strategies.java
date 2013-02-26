@@ -13,14 +13,19 @@ public class Strategies {
 	public static void doSomeLogic(ActualStatus stats) {
 		status = stats;
 		Sector actionSector;
+		char action = Const.ACTION_SHOT;
 		//if there is something with priority from previous round shot at it:
 		findSectors(Const.PRIOR_SOON);
-		if (list.size() > 0) {	actionSector = selectRandomFromList(); }
+		if (list.size() > 0) {
+			actionSector = selectRandomFromList(); 
+			status.setAction(actionSector.getXPos(), actionSector.getYPos(),  action); 
+			return; 
+		}
 		
 		//default grid filling
 		gridFill();
 		actionSector = selectRandomFromList();
-		status.setAction(actionSector.getXPos(), actionSector.getYPos(), Const.ACTION_SHOT);
+		status.setAction(actionSector.getXPos(), actionSector.getYPos(), action);
 	}
 
 	private static void gridFill() {
@@ -32,8 +37,8 @@ public class Strategies {
 		while((actual = iterator.nextSector()) != null) {
 			if (actual.isSectorKnown()) continue;
 
-			int xDiff = actual.xPos%3;
-			int yDiff = actual.yPos%3;
+			int xDiff = actual.getXPos()%3;
+			int yDiff = actual.getYPos()%3;
 			
 			if (xDiff == 2 && yDiff == 2) {
 				if (minLevel>1) {
@@ -63,7 +68,7 @@ public class Strategies {
 						list.add(actual);
 					}
 					if (minLevel>3) {
-						if ((Math.abs(actual.xPos-actual.yPos) % 3) == 2) {  //max 34 shots
+						if ((Math.abs(actual.getXPos()-actual.getYPos()) % 3) == 2) {  //max 34 shots
 							if (minLevel>4) {
 								list.clear();
 								minLevel = 4;

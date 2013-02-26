@@ -5,7 +5,7 @@ import usedConsts.Const;
 import usedConsts.StatusConsts;
 
 public class ActualStatus {
-	
+
 	public int side=0;
 	public int round = 1;
 	public int roundsToEnd = 0;
@@ -16,15 +16,15 @@ public class ActualStatus {
 	private char torpedoDir;
 	public Sector[][] battlefield = 
 			new Sector[StatusConsts.SECTOR_SIZE][StatusConsts.SECTOR_SIZE];
-	
+
 	//status variables:
-	
-	
+
+
 	public int[] findAirstrikePos(){
 		int PosBest[]= {15,15};
 		int best=StatusConsts.HEUR_THRESHOLD+1;
 		int currHeurValue;
-		
+
 		for(int xAxis=StatusConsts.HEUR_OFFSET;
 				xAxis<(StatusConsts.SECTOR_SIZE-StatusConsts.HEUR_OFFSET);
 				xAxis++){
@@ -40,26 +40,29 @@ public class ActualStatus {
 						PosBest[1]=yAxis;
 						best=currHeurValue;
 					}
-						
+
 				}
 			}
-			}
+		}
 		return PosBest;
 	}
 	public Sector getSector(int x, int y) {
 		return this.battlefield[x][y];
 	}
-	
+	public void setSector(int logCondition, int priorTemp, int column, int battlefieldRow) {
+		this.battlefield[column][battlefieldRow] = new Sector(logCondition, priorTemp, column, battlefieldRow);
+	}
+
 	public List<Sector> getNeighbors(Sector home, int mode) {  //1 for linear, 2 linear+diagonal
 		if (!(mode == 1 || mode == 2)) {
 			System.err.println("ROUND " + this.getStats()[0] + " Bad parameter for getNeighbors: " + mode);
 			return null;
 		}
 		List<Sector> list = new ArrayList<Sector>();
-		    //                          north                         south                     west                      east        
-		int[][] nearestPos = { { home.xPos,home.yPos-1 }, { home.xPos,home.yPos+1 }, { home.xPos-1,home.yPos }, { home.xPos+1,home.yPos }
-			//        northeast                    southeast                     southwest                   northwest
-			, {home.xPos+1,home.yPos-1}, { home.xPos+1, home.yPos+1 }, { home.xPos-1, home.yPos+1 }, { home.xPos-1, home.yPos+1 } };
+		//                          north                         south                     west                      east        
+		int[][] nearestPos = { { home.getXPos(),home.getYPos()-1 }, { home.getXPos(),home.getYPos()+1 }, { home.getXPos()-1,home.getYPos() }, { home.getXPos()+1,home.getYPos() }
+		//        northeast                    southeast                     southwest                   northwest
+		, {home.getXPos()+1,home.getYPos()-1}, { home.getXPos()+1, home.getYPos()+1 }, { home.getXPos()-1, home.getYPos()+1 }, { home.getXPos()-1, home.getYPos()+1 } };
 		for (int i = 0; i<mode*4; i++) {
 			if ( nearestPos[i][0] < 14 && nearestPos[i][0] >= 0 && nearestPos[i][1] <14 && nearestPos[i][1] >= 0) {
 				list.add(this.getSector(nearestPos[i][0], nearestPos[i][1]));
@@ -67,12 +70,15 @@ public class ActualStatus {
 		}
 		return list.size() > 0 ? list : null;
 	}
-	
+
 	public static void makeNextShot(List<Sector> list) {
 		if (list == null) return;
-		for (int i = 1; i<=list.size(); i++) {
-			if (list.get(i).getPriority() > Const.PRIOR_MIN && list.get(i).getCondition() == Const.UNKNOWN) {
-					list.get(i).setStats(Const.NEXT_ROUND_SHOT, Const.PRIOR_SOON);
+		Sector actual;
+		for (int i = 0; i<list.size(); i++) {
+			actual = list.get(i);
+			if (actual.getPriority() > Const.PRIOR_MIN && actual.getCondition() == Const.CONDITION_UNKNOWN) {
+				actual.setStats(Const.CONDITION_NEXT_SHOT, Const.PRIOR_SOON);
+				if (Const.DEBUG) System.err.println("Sector as next shot: x" + actual.getXPos() + " y" + actual.getYPos() + " set to priority " + actual.getPriority()); 
 			}
 		}		
 	}
@@ -80,7 +86,7 @@ public class ActualStatus {
 	public int[] getStats() {
 		return new int[] { this.round,  this.specialShots, this.side };
 	}
-	
+
 	public boolean setAction(int x, int y, char shot) { return setAction(x, y, shot, '0'); }
 	public boolean setAction(int x, int y, char shot, char dir) {
 		this.actionX = x;
@@ -110,7 +116,7 @@ public class ActualStatus {
 		}
 		else return String.format("%c %d %d", this.action, this.actionX, this.actionY);
 	}
-	
+
 	public Sector getActionPos() {
 		return this.battlefield[this.actionX][this.actionY];
 	}
@@ -120,7 +126,7 @@ public class ActualStatus {
 	public char getTorpedoDirection() {
 		return this.torpedoDir;
 	}
-		
+
 	public void calculateHeuristics()
 	{
 		Sector currSector;
@@ -141,7 +147,7 @@ public class ActualStatus {
 			}
 		}
 	}
-	
+
 	public void print_heuristics()
 	{
 		for(int xAxis=StatusConsts.HEUR_OFFSET;
@@ -155,7 +161,7 @@ public class ActualStatus {
 			System.out.println();
 		}
 	}
-    
+
 	private int calculateSectorHeuristics(int x, int y)
 	{
 		int value;

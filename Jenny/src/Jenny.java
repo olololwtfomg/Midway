@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import usedConsts.Const;
+import usedConsts.StatusConsts;
 
 public class Jenny {
 	static ActualStatus status;
@@ -26,14 +27,15 @@ public class Jenny {
 		/////////////////////////////////////////////////////
 		Stopwatch watch = new Stopwatch(true);///////////////////
 		/////////////////////////////////////////////////////
-		loadLog(loadStatus());
+		loadStatus();
+		loadLog(false);
+		System.err.println("Sector 3, 8 priority: " + status.getSector(3, 8).getPriority());
+		System.err.println("Sector 2, 9 priority: " + status.getSector(2, 9).getPriority());
 		Strategies.doSomeLogic(status);
-		
+
 		saveStatusToLog();
 		if (Const.TIMER) System.err.println("ROUND " + status.round + " Time: " + (watch.actualTime()/1000000) + "ms."); 
 		System.out.println(status.getActionWord());
-		//System.out.format("%s [%d] [%d]", shot.)
-		//System.out.format("%s [%d] [%d] %c",
 		/*
 		status.calculateHeuristics();
 		status.print_heuristics();
@@ -62,7 +64,7 @@ public class Jenny {
 			if (!file.isFile()) {
 				System.err.println("Log neexistuje.");
 				//log is broken ... create new based on system input
-				
+
 				//set blank near our ships
 				Sector actual;
 				SectorIterator iterator = new SectorIterator(status);
@@ -76,51 +78,48 @@ public class Jenny {
 			br = new BufferedReader(new FileReader(file));
 
 			currentLine = br.readLine(); //initialize priorities for system input
-			String[] splitLine = currentLine.split("[^0-9]+");
-			
+			String[] prioritiesLine = currentLine.split("[^0-9]+");
+			int priorityIndex = 0;
+
 			currentLine = br.readLine(); //last move
 			int priorTemp = 0;
 
 			int battlefieldRow = 0;
 			int logCondition = 0;
-			int priorityIndex = 0;
 			while ((currentLine = br.readLine()) != null) {  //posun na dalsi riadok
-				if (battlefieldRow<14) {
-					for (int column = 0; column< currentLine.length() && column<15; column++) {  //prechod riadkom
-						logCondition = parseCondition(currentLine.charAt(column));
-						if (!badInputFile) {
-							switch (logCondition) {  //load priority
-							case Const.CONDITION_ENEMY_SHIP:
-							case Const.NEXT_ROUND_SHOT:
-							case Const.UNKNOWN:
-							case Const.CONDITION_BLANK:
-								if (splitLine.length > priorityIndex) {
-									status.battlefield[column][battlefieldRow].priority = Integer.parseInt(splitLine[priorityIndex++]);
-								} else {
-									System.err.println("Fatal error while loading priorities from log. priorities.length = " + splitLine.length);
-									status.battlefield[column][battlefieldRow].priority = Const.PRIOR_UNKNOWN;  //if the log priorities are not good enough
-								}
+				for (int column = 0; column< currentLine.length() && column<StatusConsts.SECTOR_SIZE; column++) {  //prechod riadkom
+					logCondition = parseCondition(currentLine.charAt(column));
+					if (!badInputFile) {
+						switch (logCondition) {  //load priority
+						case Const.CONDITION_ENEMY_SHIP:
+						case Const.CONDITION_NEXT_SHOT:
+						case Const.CONDITION_UNKNOWN:
+						case Const.CONDITION_BLANK:
+							if (priorityIndex < prioritiesLine.length) {
+								status.getSector(column, battlefieldRow).setStats(null, Integer.parseInt(prioritiesLine[priorityIndex]));
+								priorityIndex++;
+							} else {
+								System.err.println("ROUND " + status.getStats()[0] + " Error loading priorities from log. priorities.length = " + prioritiesLine.length);
+								status.getSector(column, battlefieldRow).setStats(null, Const.PRIOR_UNKNOWN);  //if the log priorities are not good enough
 							}
-							
-							compareInputVSLog(status.battlefield[column][battlefieldRow], logCondition);
-
-						} else {  //nebol spravne nacitany input ... ziadne nove informacie z logu
-							System.err.println("Nenacitany system input file v kole: " + status.round);
-							switch (logCondition) {
-							case Const.CONDITION_BLANK: priorTemp = Const.PRIOR_MIN; break;
-							case Const.UNKNOWN: priorTemp = Const.PRIOR_UNKNOWN; break;
-							case Const.NEXT_ROUND_SHOT: priorTemp = Const.PRIOR_SOON; break;
-							case Const.CONDITION_ENEMY_SHIP: priorTemp = Const.PRIOR_MAX; break;
-							}
-							status.battlefield[column][battlefieldRow] = new Sector(logCondition, priorTemp, column, battlefieldRow);
 						}
+						if (Const.HARD_DEBUG) System.err.println("ROUND " + status.getStats()[0] + " Pocet priorit: " + prioritiesLine.length + " posledna priradena: " + priorityIndex);
 
+						compareInputVSLog(status.getSector(column, battlefieldRow), logCondition);
+						if (column == 3 && battlefieldRow == 8) System.err.println("Priority at 3 8: " + prioritiesLine[priorityIndex]);
+					} else {  //nebol spravne nacitany input ... ziadne nove informacie z logu
+						System.err.println("ROUND " + status.getStats()[0] + "Nenacitany system input file.");
+						switch (logCondition) {
+						case Const.CONDITION_BLANK: priorTemp = Const.PRIOR_MIN; break;
+						case Const.CONDITION_UNKNOWN: priorTemp = Const.PRIOR_UNKNOWN; break;
+						case Const.CONDITION_NEXT_SHOT: priorTemp = Const.PRIOR_SOON; break;
+						case Const.CONDITION_ENEMY_SHIP: priorTemp = Const.PRIOR_MAX; break;
+						}
+						status.setSector(logCondition, priorTemp, column, battlefieldRow);
 					}
-					battlefieldRow++;
-				} else {
-					System.err.println("Vstupny subor nema dost riadkov pre battlefield. Posledny riadok: " + (battlefieldRow - 1) + ", pocet znakov: " + currentLine.length());
-					battlefieldRow++;
+
 				}
+				battlefieldRow++;
 			}			
 		} catch (IOException e) {
 			System.err.println("Nieje mozne citat log.");
@@ -143,45 +142,46 @@ public class Jenny {
 			switch (log) {  //before:
 			case Const.CONDITION_ENEMY_SHIP:
 			case Const.CONDITION_BLANK:
-			case Const.NEXT_ROUND_SHOT:
-			case Const.UNKNOWN:
+			case Const.CONDITION_NEXT_SHOT:
+			case Const.CONDITION_UNKNOWN:
 				//check if we shot (torpedo or firework) this way else its enemy shot
-				sector.condition = Const.ENEMY_SHOT;
+				sector.setStats(Const.CONDITION_ENEMY_SHOT, null);
 				break;
-			case Const.OUR_SHOT:  //old our shot
-			case Const.ENEMY_SHOT:  //old enemy shot
-				sector.condition = log;
+			case Const.CONDITION_OUR_SHOT:  //old our shot
+			case Const.CONDITION_ENEMY_SHOT:  //old enemy shot
+				sector.setStats(log, null); 
 				break;
 			case Const.CONDITION_SOME_SHOT:    //possible if there was problem with log in last round (copyed directly from input) or this is first round and the shot is from enemy
-				sector.condition = Const.ENEMY_SHOT;
+				sector.setStats(Const.CONDITION_ENEMY_SHOT, null);
 				break;
 			}
-		} else if (input == Const.ALLY_SUNK) {  //ally ship sunken
+		} else if (input == Const.CONDITION_ALLY_SUNK) {  //ally ship sunken
 			if (log == Const.CONDITION_ALLY_SHIP) {
 				//enemy new hit
 			}
-		} else if (input == Const.ENEMY_SUNK) {  //enemy ship sunken
+		} else if (input == Const.CONDITION_ENEMY_SUNK) {  //enemy ship sunken
 			switch (log) {
 			case Const.CONDITION_ENEMY_SHIP:  //cool logic - reapeat and won
 				break;
-			case Const.UNKNOWN:  //something destroyed enemy ship (special bomb/enemy)
-			case Const.OUR_SHOT:  //last shot succeded - continue in shoting around
+			case Const.CONDITION_UNKNOWN:  //something destroyed enemy ship (special bomb/enemy)
+			case Const.CONDITION_OUR_SHOT:  //last shot succeded - continue in shoting around
 				ActualStatus.makeNextShot(status.getNeighbors(sector, 1) );
+				System.err.println("Sector x" + (sector.getXPos()+1) + " y" + sector.getYPos() + " priority: "+ sector.getPriority());
 				break;
 			case Const.CONDITION_BLANK:
 				break;
-			case Const.NEXT_ROUND_SHOT:  //special bomb succeded
+			case Const.CONDITION_NEXT_SHOT:  //special bomb succeded
 				break;
 			default:  //enemy destroyed own ship
 				break;
 			}
-		} else if (input == Const.UNKNOWN) {  //unknown - in log is our logic
+		} else if (input == Const.CONDITION_UNKNOWN) {  //unknown - in log is our logic
 			switch (log) {
 			case Const.CONDITION_ALLY_SHIP:
-			case Const.OUR_SHOT:
-			case Const.ENEMY_SHOT:
-			case Const.ALLY_SUNK:
-			case Const.ENEMY_SUNK:
+			case Const.CONDITION_OUR_SHOT:
+			case Const.CONDITION_ENEMY_SHOT:
+			case Const.CONDITION_ALLY_SUNK:
+			case Const.CONDITION_ENEMY_SUNK:
 				sector.setStats(log,null);  //problems with system input - loadead from default
 				break;
 			case Const.CONDITION_ENEMY_SHIP:  
@@ -190,7 +190,7 @@ public class Jenny {
 			case Const.CONDITION_BLANK:
 				sector.setStats(log,null);
 				break;
-			case Const.NEXT_ROUND_SHOT:
+			case Const.CONDITION_NEXT_SHOT:
 				sector.setStats(log,null);
 				break;
 			default: //copy from input
@@ -233,28 +233,29 @@ public class Jenny {
 			StringBuffer prioritiesLine = new StringBuffer();
 			Sector actual;
 			while ((actual = iterator.nextSector()) != null) {
-				switch (actual.condition) {
+				switch (actual.getCondition()) {
 				case Const.CONDITION_ENEMY_SHIP:
-				case Const.NEXT_ROUND_SHOT:
-				case Const.UNKNOWN:
+				case Const.CONDITION_NEXT_SHOT:
+				case Const.CONDITION_UNKNOWN:
 				case Const.CONDITION_BLANK:
-					prioritiesLine.append(actual.priority + " ");
+					if (Const.HARD_DEBUG) System.err.println("Saving priority for x" + actual.getXPos() + " y" + actual.getYPos() + " to " + actual.getPriority());
+					prioritiesLine.append(actual.getPriority() + " ");
 				}
 			}
 			bw.write(prioritiesLine.toString());
 			bw.newLine();
-			
+
 			/////////////////////////////////
 			////////////////////////////////
 			///////////////////////////////
-			
+
 			bw.write(status.getActionWord()); //last shot
 			bw.newLine();
 			StringBuffer currLine = null;
-			for (int row = 0; row<status.battlefield.length; row++) {
+			for (int row = 0; row<StatusConsts.SECTOR_SIZE; row++) {
 				currLine = new StringBuffer();				
-				for (int column = 0; column<status.battlefield[row].length; column++) {
-					currLine.append(status.battlefield[column][row].condition);
+				for (int column = 0; column<StatusConsts.SECTOR_SIZE; column++) {
+					currLine.append(status.getSector(column, row).getCondition());
 				}
 				bw.write(currLine.toString());
 				bw.newLine();
@@ -335,19 +336,19 @@ public class Jenny {
 		}
 		return false;
 	}
-	
-	
+
+
 	private static void loadDefaultStatus() {
 		status.side = 1;
 		status.roundsToEnd = 150;
 		status.specialShots = 10;
 		for (int row = 0; row<status.battlefield.length;row++) {
 			for (int column = 0; column<status.battlefield[row].length; column++) {
-				status.battlefield[column][row] = new Sector(Const.UNKNOWN,Const.PRIOR_UNKNOWN,column,row);
+				status.battlefield[column][row] = new Sector(Const.CONDITION_UNKNOWN,Const.PRIOR_UNKNOWN,column,row);
 			}
 		}
 	}
-	
+
 	private static int parseCondition(char charAt) {
 		int condition = 0;
 
@@ -365,21 +366,21 @@ public class Jenny {
 		case '.':
 			condition = Const.CONDITION_SOME_SHOT; break;  //nothing, hit
 		case '4':
-			condition = Const.OUR_SHOT; break;  //our shot on nothing  /extends 3
+			condition = Const.CONDITION_OUR_SHOT; break;  //our shot on nothing  /extends 3
 		case '5':
-			condition = Const.ENEMY_SHOT; break;  //enemy shot on nothing  /extends 3
+			condition = Const.CONDITION_ENEMY_SHOT; break;  //enemy shot on nothing  /extends 3
 		case '6':
 		case '*':
-			condition = Const.ALLY_SUNK; break;  //ally ship, sunk
+			condition = Const.CONDITION_ALLY_SUNK; break;  //ally ship, sunk
 		case '7':
 		case '+':
-			condition = Const.ENEMY_SUNK; break;  //enemy ship, sunk
+			condition = Const.CONDITION_ENEMY_SUNK; break;  //enemy ship, sunk
 		case '8':
 			condition = Const.CONDITION_BLANK; break;  //probably blank sector
 		case '9':
-			condition = Const.NEXT_ROUND_SHOT; break;  //next round shot
+			condition = Const.CONDITION_NEXT_SHOT; break;  //next round shot
 		case ' ':
-			condition = Const.UNKNOWN; break;  //unknown
+			condition = Const.CONDITION_UNKNOWN; break;  //unknown
 		}
 		return condition;
 	}

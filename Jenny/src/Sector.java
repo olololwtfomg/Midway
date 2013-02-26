@@ -10,12 +10,12 @@ public class Sector {
 	 * TODO: hodnoty podla pravdepodobnostneho modelu
 	 * */
 	
-	int xPos = 0;  //column
-	int yPos = 0;  //row
+	private int xPos = 0;  //column
+	private int yPos = 0;  //row
 
-	int condition = 0;
+	private int condition = 0;
 	private EnemyShip enemyShip;
-	int priority = Const.PRIOR_UNKNOWN;  //0 - 100 ... 0 for blank, 50 standard shot, 80 high priority
+	private int priority = Const.PRIOR_UNKNOWN;  //0 - 100 ... 0 for blank, 50 standard shot, 80 high priority
 	
 	int heurValue= 0; //for heuristics
 
@@ -64,17 +64,17 @@ public class Sector {
 		{
 		// TODO: heuristicke hodnoty pre jednotlive polia
 			case Const.CONDITION_ALLY_SHIP:
-			case Const.ALLY_SUNK: 
+			case Const.CONDITION_ALLY_SUNK: 
 				retval=Heuristic.OWN_SHIP; break;
 			case Const.CONDITION_ENEMY_SHIP: retval=Heuristic.ENEMY_SHIP; break;
 			case Const.CONDITION_SOME_SHOT: 
-			case Const.ENEMY_SHOT: 
-			case Const.OUR_SHOT: 
+			case Const.CONDITION_ENEMY_SHOT: 
+			case Const.CONDITION_OUR_SHOT: 
 				retval=Heuristic.MISSED; break; 
-			case Const.ENEMY_SUNK: 
+			case Const.CONDITION_ENEMY_SUNK: 
 				retval=Heuristic.HIT; break;
 			case Const.CONDITION_BLANK:
-			case Const.UNKNOWN:
+			case Const.CONDITION_UNKNOWN:
 			default:
 				retval=Heuristic.UNKNOWN;
 		}
@@ -82,10 +82,10 @@ public class Sector {
 	}
 	
 	public boolean isSectorKnown() {
-		return this.getCondition() != Const.UNKNOWN && this.getCondition() != Const.NEXT_ROUND_SHOT && this.getCondition() != Const.CONDITION_ENEMY_SHIP;
+		return this.getCondition() != Const.CONDITION_UNKNOWN && this.getCondition() != Const.CONDITION_NEXT_SHOT && this.getCondition() != Const.CONDITION_ENEMY_SHIP;
 	}
 	public void shot() {
-		if (!this.isSectorKnown() || this.condition == Const.CONDITION_BLANK) { this.setStats(Const.OUR_SHOT, null); }
+		if (!this.isSectorKnown() || this.condition == Const.CONDITION_BLANK) { this.setStats(Const.CONDITION_OUR_SHOT, null); }
 	}
 	
 	public void setEnemyShip(EnemyShip enemyShip) {
@@ -112,7 +112,7 @@ public class Sector {
 			if (x<14 && y<14 && x>=0 && y>=0) {
 				temp = status.battlefield[x][y];
 				switch (temp.condition) {
-				case Const.UNKNOWN: 
+				case Const.CONDITION_UNKNOWN: 
 					temp.condition = Const.CONDITION_BLANK; 
 					temp.priority = Const.PRIOR_MIN;
 					break;  //unknown from system input
