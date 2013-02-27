@@ -41,42 +41,24 @@ public class Strategies {
 			int yDiff = actual.getYPos()%3;
 			
 			if (xDiff == 2 && yDiff == 2) {
-				if (minLevel>1) {
-					list.clear();
-					minLevel = 1;
-				}
-//				actual.priority = Const.PRIOR_FIRSTLEVEL;  //first level - max 16 shots
+				if (minLevel>1) { list.clear(); minLevel = 1; }
 				list.add(actual);
 			}
 			else if (minLevel>1) {
 				if (xDiff == 0 && yDiff == 0) {
-					if (minLevel>2) {
-						list.clear();
-						minLevel = 2;
-					}
-//					actual.priority = Const.PRIOR_SECONDLEVEL; //second level - max 25 shots
+					if (minLevel>2) { list.clear(); minLevel = 2; }
 					list.add(actual);
-
 				}
 				if (minLevel>2) {
 					if (xDiff == 1 && yDiff == 1) {
-						if (minLevel>3) {
-							list.clear();
-							minLevel = 3;
-						}
-//						actual.priority = Const.PRIOR_THIRDLEVEL; //third level - max 25 shots
+						if (minLevel>3) { list.clear(); minLevel = 3; }
 						list.add(actual);
 					}
 					if (minLevel>3) {
 						if ((Math.abs(actual.getXPos()-actual.getYPos()) % 3) == 2) {  //max 34 shots
-							if (minLevel>4) {
-								list.clear();
-								minLevel = 4;
-							}							
-//							actual.priority = Const.PRIOR_FINESTLEVEL;
+							if (minLevel>4) { list.clear(); minLevel = 4; }
 							list.add(actual);
-						} else {
-//							actual.priority = Const.PRIOR_LASTLEVEL;  //max 35
+						} else {//max 35
 							list.add(actual);
 						}
 						
