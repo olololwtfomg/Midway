@@ -79,34 +79,26 @@ public class Jenny {
 			int priorityIndex = 0;
 
 			currentLine = br.readLine(); //last move
-			int priorTemp = 0;
 
 			int battlefieldRow = 0;
 			int logCondition = 0;
 			while ((currentLine = br.readLine()) != null) {  //posun na dalsi riadok
 				for (int column = 0; column< currentLine.length() && column<StatusConsts.SECTOR_SIZE; column++) {  //prechod riadkom
 					logCondition = parseCondition(currentLine.charAt(column));
+					
+					//set priorities for unknowns
 					if (logCondition == Const.CONDITION_UNKNOWN) {
-						if (priorityIndex < prioritiesLine.length) { 
-							System.err.println("Priorities line too short. length: " + prioritiesLine.length);
-							priorTemp = Const.PRIOR_DEFAULT;
-						} else {
-						priorTemp = Integer.parseInt(prioritiesLine[priorityIndex]);
-						priorityIndex++;
-						}
+						if (priorityIndex < prioritiesLine.length) {
+							status.getSector(column, battlefieldRow).setStats(null, Integer.parseInt(prioritiesLine[priorityIndex++]));
+						}  //default priority sets loadStatus
 					}
 					
+					//set conditions
 					if (!badInputFile) {
-						compareInputVSLog(status.getSector(column, battlefieldRow), logCondition);
-					} else {  //nebol spravne nacitany input ... ziadne nove informacie o hre ... prepisanie dat z logu
-						System.err.println("ROUND " + status.getRound() + "Nenacitany system input file.");
-						if (logCondition == Const.CONDITION_UNKNOWN) {
-							status.setSector(logCondition, priorTemp, column, battlefieldRow);
-						} else {
-							status.setSector(logCondition, column, battlefieldRow);
-						}
+						compareInputVSLog(status.getSector(column, battlefieldRow), logCondition);								
+					} else {
+						status.getSector(column, battlefieldRow).setStats(logCondition, null);
 					}
-
 				}
 				battlefieldRow++;
 			}			
@@ -329,7 +321,7 @@ public class Jenny {
 		status.specialShots = 10;
 		for (int row = 0; row<status.battlefield.length;row++) {
 			for (int column = 0; column<status.battlefield[row].length; column++) {
-				status.battlefield[column][row] = new Sector(Const.CONDITION_UNKNOWN,column,row);
+				status.setSector(Const.CONDITION_UNKNOWN, column, row);
 			}
 		}
 	}
