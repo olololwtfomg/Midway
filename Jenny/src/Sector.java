@@ -15,7 +15,7 @@ public class Sector {
 
 	private int condition = 0;
 	private EnemyShip enemyShip;
-	private int priority = Const.PRIOR_MIN;  //0 - 100 ... 0 for blank, 50 standard shot, 80 high priority
+	private int priority = Const.PRIOR_DEFAULT;  //0 - 100 ... 0 for blank, 50 standard shot, 80 high priority
 	//set priority only to unknown sectors ... condition is superior else (not secured in setstats)
 	
 	int heurValue= 0; //for heuristics
@@ -114,8 +114,7 @@ public class Sector {
 				temp = status.battlefield[x][y];
 				switch (temp.condition) {
 				case Const.CONDITION_UNKNOWN: 
-					temp.condition = Const.CONDITION_BLANK; 
-					temp.priority = Const.PRIOR_MIN;
+					temp.setStats(Const.CONDITION_BLANK, null); 
 					break;  //unknown from system input
 				}
 			}

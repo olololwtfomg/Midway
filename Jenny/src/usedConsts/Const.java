@@ -16,11 +16,8 @@ public interface Const {
 	public static final int CONDITION_NEXT_SHOT=9;  //high priority
 	public static final int CONDITION_UNKNOWN=0;  //possible for shot
 	
-	public static final int PRIORITY_DIFF = 1;
-	public static final int PRIOR_MIN = 0;
-	public static final int PRIOR_UNKNOWN = 50;
-	public static final int PRIOR_SOON = 80;
-	public static final int PRIOR_MAX = 100;
+	public static final int PRIORITY_DIFF = 5;
+	public static final int PRIOR_DEFAULT = 0;
 	
 	
 	public static final char ACTION_SHOT = 'm';

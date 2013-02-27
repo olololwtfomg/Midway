@@ -19,7 +19,7 @@ public class Strategies {
 		if (list.size() > 0) {
 			actionSector = selectRandomFromList(); 
 			status.setAction(actionSector.getXPos(), actionSector.getYPos(),  action); 
-			return; 
+			return;
 		}
 		
 		//default grid filling

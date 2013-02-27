@@ -86,20 +86,21 @@ public class Jenny {
 			while ((currentLine = br.readLine()) != null) {  //posun na dalsi riadok
 				for (int column = 0; column< currentLine.length() && column<StatusConsts.SECTOR_SIZE; column++) {  //prechod riadkom
 					logCondition = parseCondition(currentLine.charAt(column));
-					if (!badInputFile) {
-						//priority for unknowns
-						if (logCondition == Const.CONDITION_UNKNOWN && priorityIndex < prioritiesLine.length) {
-							status.getSector(column, battlefieldRow).setStats(null, Integer.parseInt(prioritiesLine[priorityIndex]));
-							priorityIndex++;
+					if (logCondition == Const.CONDITION_UNKNOWN) {
+						if (priorityIndex < prioritiesLine.length) { 
+							System.err.println("Priorities line too short. length: " + prioritiesLine.length);
+							priorTemp = Const.PRIOR_DEFAULT;
+						} else {
+						priorTemp = Integer.parseInt(prioritiesLine[priorityIndex]);
+						priorityIndex++;
 						}
-						
+					}
+					
+					if (!badInputFile) {
 						compareInputVSLog(status.getSector(column, battlefieldRow), logCondition);
-
-
 					} else {  //nebol spravne nacitany input ... ziadne nove informacie o hre ... prepisanie dat z logu
 						System.err.println("ROUND " + status.getRound() + "Nenacitany system input file.");
 						if (logCondition == Const.CONDITION_UNKNOWN) {
-							priorTemp = Const.PRIOR_UNKNOWN;
 							status.setSector(logCondition, priorTemp, column, battlefieldRow);
 						} else {
 							status.setSector(logCondition, column, battlefieldRow);
@@ -328,7 +329,7 @@ public class Jenny {
 		status.specialShots = 10;
 		for (int row = 0; row<status.battlefield.length;row++) {
 			for (int column = 0; column<status.battlefield[row].length; column++) {
-				status.battlefield[column][row] = new Sector(Const.CONDITION_UNKNOWN,Const.PRIOR_UNKNOWN,column,row);
+				status.battlefield[column][row] = new Sector(Const.CONDITION_UNKNOWN,column,row);
 			}
 		}
 	}

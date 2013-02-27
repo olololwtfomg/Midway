@@ -78,7 +78,7 @@ public class ActualStatus {
 		if (list == null) return;
 		for (Sector actual: list) {
 			if (actual.getCondition() == Const.CONDITION_UNKNOWN) {
-				actual.setStats(Const.CONDITION_NEXT_SHOT, Const.PRIOR_SOON);
+				actual.setStats(Const.CONDITION_NEXT_SHOT, null);
 				if (Const.DEBUG) System.err.println("Sector as next shot: x" + actual.getXPos() + " y" + actual.getYPos() + " set to priority " + actual.getPriority()); 
 			}
 		}		
