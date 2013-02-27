@@ -21,7 +21,7 @@ public class Strategies {
 			status.setAction(actionSector.getXPos(), actionSector.getYPos(),  action); 
 			return;
 		}
-		
+
 		//default grid filling
 		gridFill();
 		actionSector = selectRandomFromList();
@@ -29,45 +29,51 @@ public class Strategies {
 	}
 
 	private static void gridFill() {
-		
-		int minLevel = 5;  //cislo minimalnej urovne ktorej bunky boli najdene
-		
+
+		int minLevel = 6;  //cislo minimalnej urovne ktorej bunky boli najdene
+
 		SectorIterator iterator = new SectorIterator(status);
 		Sector actual;
 		while((actual = iterator.nextSector()) != null) {
 			if (actual.isSectorKnown()) continue;
 
-			int xDiff = actual.getXPos()%3;
-			int yDiff = actual.getYPos()%3;
-			
-			if (xDiff == 2 && yDiff == 2) {
+			int xDiff = actual.getXPos()%4;
+			int yDiff = actual.getYPos()%4;
+
+			if (xDiff == 3 && yDiff == 3) {
 				if (minLevel>1) { list.clear(); minLevel = 1; }
 				list.add(actual);
 			}
 			else if (minLevel>1) {
-				if (xDiff == 0 && yDiff == 0) {
+				if (xDiff == 1 && yDiff == 1) {
 					if (minLevel>2) { list.clear(); minLevel = 2; }
 					list.add(actual);
 				}
 				if (minLevel>2) {
-					if (xDiff == 1 && yDiff == 1) {
+					if (xDiff == 2 && yDiff == 2) {
 						if (minLevel>3) { list.clear(); minLevel = 3; }
 						list.add(actual);
 					}
 					if (minLevel>3) {
-						if ((Math.abs(actual.getXPos()-actual.getYPos()) % 3) == 2) {  //max 34 shots
+						if (xDiff == 0 && yDiff == 0) {
 							if (minLevel>4) { list.clear(); minLevel = 4; }
 							list.add(actual);
-						} else {//max 35
-							list.add(actual);
 						}
-						
+						if (minLevel>4) {
+							if ((Math.abs(actual.getXPos()-actual.getYPos()) % 4) == 2) {  //max 48
+								if (minLevel>5) { list.clear(); minLevel = 5; }
+								list.add(actual);
+							} else if (minLevel > 5) {
+								list.add(actual);
+							}
+
+						}
 					}
 				}
 			}
 		}
 	}
-	
+
 	private static void findSectorsByCondition(int condition) {
 		SectorIterator iterator = new SectorIterator(status);
 		Sector actual;
@@ -88,11 +94,11 @@ public class Strategies {
 			}
 		}
 	}
-	
+
 	private static void findShips(boolean shipsFinall) {
-		
+
 	}
-	
+
 	private static Sector selectRandomFromList() {
 		Random rnd = new Random();
 		return list.get( rnd.nextInt(list.size()) );
