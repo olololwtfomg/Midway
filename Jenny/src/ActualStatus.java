@@ -14,10 +14,14 @@ public class ActualStatus {
 	private int actionY;
 	private char action;
 	private char torpedoDir;
-	public Sector[][] battlefield = 
+	private Sector[][] battlefield = 
 			new Sector[StatusConsts.SECTOR_SIZE][StatusConsts.SECTOR_SIZE];
-
-	//status variables:
+	private List<EnemyShip> enemyShipsList = new ArrayList<EnemyShip>();
+	private int found2x1 = 0;
+	private int found3x1 = 0;
+	private int found4x1 = 0;
+	private int found5x1 = 0;
+	private int found3x2 = 0;
 
 
 	public int[] findAirstrikePos(){
@@ -67,7 +71,12 @@ public class ActualStatus {
 		}
 		return list.size() > 0 ? list : null;
 	}
-
+	public int founded2x1() { return this.found2x1; }
+	public int founded3x1() { return this.found3x1; }
+	public int founded4x1() { return this.found4x1; }
+	public int founded5x1() { return this.found5x1; }
+	public int founded3x2() { return this.found3x2; }
+	
 	public static void makeNextShot(List<Sector> list) {
 		if (list == null) return;
 		for (Sector actual: list) {

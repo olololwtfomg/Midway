@@ -315,8 +315,8 @@ public class Jenny {
 		status.side = 1;
 		status.roundsToEnd = 150;
 		status.specialShots = 10;
-		for (int row = 0; row<status.battlefield.length;row++) {
-			for (int column = 0; column<status.battlefield[row].length; column++) {
+		for (int row = 0; row<StatusConsts.SECTOR_SIZE;row++) {
+			for (int column = 0; column<StatusConsts.SECTOR_SIZE; column++) {
 				status.setSector(Const.CONDITION_UNKNOWN, column, row);
 			}
 		}

@@ -8,24 +8,51 @@ import usedConsts.Const;
 public class Strategies {
 
 	private static ActualStatus status;
-	private static List<Sector> list = new ArrayList<Sector>();
 
 	public static void doSomeLogic(ActualStatus stats) {
 		status = stats;
 		Sector actionSector;
-		char action = Const.ACTION_SHOT;
-		//if there is something with condition from previous round shot at it:
-		findSectorsByCondition(Const.CONDITION_NEXT_SHOT);
-		if (list.size() > 0) {
-			actionSector = selectRandomFromList();
-			status.setAction(actionSector.getXPos(), actionSector.getYPos(),  action); 
-			return;
-		}
-		setGridPriorities();  //gridMin - gridMin+5*gridDiff
 		
-		selectHighestPriorSectors();
-		actionSector = selectRandomFromList();
-		status.setAction(actionSector.getXPos(), actionSector.getYPos(), action);
+		findShips(getSectorsByCondition(Const.CONDITION_ENEMY_SUNK));
+		
+		//if there is something with condition from previous round shot at it:
+		setGridPriorities();  //gridMin - gridMin+5*gridDiff
+
+		actionSector = selectRandomFromList(getShotSectors());
+		status.setAction(actionSector.getXPos(), actionSector.getYPos(), Const.ACTION_SHOT);
+	}
+
+	private static void findShips(List<Sector> enemyShips) {
+		List<Sector> neighbors;
+		List<Sector> blanks = new ArrayList<Sector>();
+		for (Sector sunken: enemyShips) {
+			
+			//basic finding
+			neighbors = status.getNeighbors(sunken, Const.NEIGHBORS_LINEAR);
+			for (Sector neighbor: neighbors) {
+				switch (neighbor.getCondition()) {
+				case Const.CONDITION_OUR_SHOT:
+				case Const.CONDITION_ENEMY_SHOT:
+				case Const.CONDITION_BLANK:
+				case Const.CONDITION_SOME_SHOT: //luck proof
+					for (int i = -1; i<=1; i+=2) {
+						blanks.add(status.getSector(
+								(neighbor.getXPos() - sunken.getXPos()) == 0 ? (sunken.getXPos() + i) : neighbor.getXPos(), 
+								(neighbor.getYPos() - sunken.getYPos()) == 0 ? (sunken.getYPos() + i) : neighbor.getYPos() 
+								));
+						ActualStatus.makeBlank(blanks);
+					}
+					break;
+				case Const.CONDITION_ENEMY_SUNK:
+					break;
+				case Const.CONDITION_ENEMY_SHIP:
+					break; //protection against ourself
+				}
+			}
+			
+			//advanced finding (neighbor one step away)
+			
+		}
 	}
 
 	private static void setGridPriorities() {
@@ -55,35 +82,39 @@ public class Strategies {
 		return 0;
 	}
 	
-	private static void findSectorsByCondition(int condition) {
+	private static List<Sector> getSectorsByCondition(int condition) {
+		List<Sector> tempList = new ArrayList<Sector>();
 		SectorIterator iterator = new SectorIterator(status);
 		Sector actual;
 		while ((actual = iterator.nextSector()) != null) {
 			if (actual.getCondition() == condition) {
-				list.add(actual);
+				tempList.add(actual);
 			}
 		}
+		return tempList;
 	}
 
-	private static void selectHighestPriorSectors() {
+	private static List<Sector> getShotSectors() {
+		List<Sector> tempList = new ArrayList<Sector>();
 		SectorIterator iterator = new SectorIterator(status);
 		Sector actual;
-		int max = 0;
+		boolean foundNextShot = false;
+		int priorMax = 0;
 		while ((actual = iterator.nextSector()) != null) {
-			if (actual.getPriority() >= max) {
-				if (actual.getPriority() > max) { list.clear(); max = actual.getPriority(); }
-				list.add(actual);
+			if (actual.getCondition() == Const.CONDITION_NEXT_SHOT || foundNextShot) {
+				if (!foundNextShot) { tempList.clear(); foundNextShot = true; }
+				tempList.add(actual);
+			} else if (actual.getPriority() >= priorMax) {
+				if (actual.getPriority() > priorMax) { tempList.clear(); priorMax = actual.getPriority(); }
+				tempList.add(actual);
 			}
 		}
+		return tempList;
 	}
-	
-	private static void findShips(boolean shipsFinall) {
 		
-	}
-	
-	private static Sector selectRandomFromList() {
+	private static Sector selectRandomFromList(List<Sector> shotSectors) {
 		Random rnd = new Random();
-		return list.get( rnd.nextInt(list.size()) );
+		return shotSectors.get( rnd.nextInt(shotSectors.size()) );
 	}
 
 }
