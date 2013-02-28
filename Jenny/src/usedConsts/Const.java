@@ -18,7 +18,12 @@ public interface Const {
 	
 	public static final int PRIORITY_DIFF = 5;
 	public static final int PRIOR_DEFAULT = 0;
+	public static final int PRIOR_GRID_MIN = 10;
 	
+	public static final int[][] NEIGHBORS_LINEAR = { {0, -1}, {0, 1}, { -1, 0}, {1, 0} };
+	public static final int[][] NEIGHBORS_DIAGONAL = { {1, -1}, {1, 1}, {-1, 1}, {-1, -1} };
+	public static final int[][] NEIGHBORS_ARROUND = { {0, -1}, {0, 1}, { -1, 0}, {1, 0}, {1, -1}, {1, 1}, {-1, 1}, {-1, -1} };
+	public static final int[][] NEIGHBORS_BOMB = { {0, 0}, {1, 0}, {0, 1}, {1, 1} };
 	
 	public static final char ACTION_SHOT = 'm';
 	public static final char ACTION_BOMB = 'b';

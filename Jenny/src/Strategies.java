@@ -14,58 +14,46 @@ public class Strategies {
 		status = stats;
 		Sector actionSector;
 		char action = Const.ACTION_SHOT;
-		//if there is something with priority from previous round shot at it:
+		//if there is something with condition from previous round shot at it:
 		findSectorsByCondition(Const.CONDITION_NEXT_SHOT);
 		if (list.size() > 0) {
-			actionSector = selectRandomFromList(); 
+			actionSector = selectRandomFromList();
 			status.setAction(actionSector.getXPos(), actionSector.getYPos(),  action); 
 			return;
 		}
+		setGridPriorities();  //gridMin - gridMin+4*gridDiff
 		
-		//default grid filling
-		gridFill();
+		selectHighestPriorSectors();
 		actionSector = selectRandomFromList();
 		status.setAction(actionSector.getXPos(), actionSector.getYPos(), action);
 	}
 
-	private static void gridFill() {
-		
-		int minLevel = 5;  //cislo minimalnej urovne ktorej bunky boli najdene
-		
+	private static void setGridPriorities() {
 		SectorIterator iterator = new SectorIterator(status);
 		Sector actual;
 		while((actual = iterator.nextSector()) != null) {
 			if (actual.isSectorKnown()) continue;
-
-			int xDiff = actual.getXPos()%3;
-			int yDiff = actual.getYPos()%3;
-			
-			if (xDiff == 2 && yDiff == 2) {
-				if (minLevel>1) { list.clear(); minLevel = 1; }
-				list.add(actual);
-			}
-			else if (minLevel>1) {
-				if (xDiff == 0 && yDiff == 0) {
-					if (minLevel>2) { list.clear(); minLevel = 2; }
-					list.add(actual);
-				}
-				if (minLevel>2) {
-					if (xDiff == 1 && yDiff == 1) {
-						if (minLevel>3) { list.clear(); minLevel = 3; }
-						list.add(actual);
-					}
-					if (minLevel>3) {
-						if ((Math.abs(actual.getXPos()-actual.getYPos()) % 3) == 2) {  //max 34 shots
-							if (minLevel>4) { list.clear(); minLevel = 4; }
-							list.add(actual);
-						} else if (minLevel>4){//max 35
-							list.add(actual);
-						}
-						
-					}
-				}
-			}
+			actual.setStats(null, (Const.PRIOR_GRID_MIN + getGridLvlForSector(actual)*Const.PRIORITY_DIFF ) );
 		}
+	}
+	
+	public static int getGridLvlForSector(Sector sector) {
+		int xDiff = sector.getXPos()%3;
+		int yDiff = sector.getYPos()%3;
+		
+		if (xDiff == 2 && yDiff == 2) {
+			return 4;
+		} 
+		if (xDiff == 0 && yDiff == 0) {
+			return 3;
+		} 
+		if (xDiff == 1 && yDiff == 1) {
+			return 2;
+		} 
+		if ((Math.abs(sector.getXPos()-sector.getYPos()) % 3) == 2) {
+			return 1;
+		}  
+		return 0;
 	}
 	
 	private static void findSectorsByCondition(int condition) {
@@ -78,12 +66,13 @@ public class Strategies {
 		}
 	}
 
-	private static void findSectorsByPriority(int prioLevel)
-	{
+	private static void selectHighestPriorSectors() {
 		SectorIterator iterator = new SectorIterator(status);
 		Sector actual;
+		int max = 0;
 		while ((actual = iterator.nextSector()) != null) {
-			if (actual.getPriority() >= prioLevel) {
+			if (actual.getPriority() >= max) {
+				if (actual.getPriority() > max) { list.clear(); max = actual.getPriority(); }
 				list.add(actual);
 			}
 		}

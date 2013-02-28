@@ -67,7 +67,7 @@ public class Jenny {
 				SectorIterator iterator = new SectorIterator(status);
 				while ((actual = iterator.nextSector()) != null) {
 					if (actual.getCondition() == Const.CONDITION_ALLY_SHIP) {
-						actual.makeNearestBlank(status);
+						ActualStatus.makeBlank(status.getNeighbors(actual, Const.NEIGHBORS_ARROUND));
 					}
 				}
 				return;
@@ -80,10 +80,11 @@ public class Jenny {
 
 			currentLine = br.readLine(); //last move
 
-			int battlefieldRow = 0;
 			int logCondition = 0;
-			while ((currentLine = br.readLine()) != null) {  //posun na dalsi riadok
-				for (int column = 0; column< currentLine.length() && column<StatusConsts.SECTOR_SIZE; column++) {  //prechod riadkom
+			for (int battlefieldRow = 0; battlefieldRow<StatusConsts.SECTOR_SIZE; battlefieldRow++) {
+				currentLine = br.readLine();
+				if (currentLine == null) System.err.println(" ");
+				for (int column = 0; column< currentLine.length() && column<StatusConsts.SECTOR_SIZE; column++) { //prechod riadkom po znakoch/sectoroch
 					logCondition = parseCondition(currentLine.charAt(column));
 					
 					//set priorities for unknowns
@@ -99,12 +100,12 @@ public class Jenny {
 					} else {
 						status.getSector(column, battlefieldRow).setStats(logCondition, null);
 					}
+					
 				}
-				battlefieldRow++;
-			}			
+			}
 		} catch (IOException e) {
 			System.err.println("Nieje mozne citat log.");
-			//log is broken ... load from system input (was done probabbly) and initialize new log
+			//log is broken ... load from system input (was done probabbly) and save new log
 		} finally {
 			try {
 				if (br != null) br.close();
@@ -118,7 +119,7 @@ public class Jenny {
 	private static void compareInputVSLog(Sector sector, int log) {
 		int input = sector.getCondition(); //status from actual input
 		if (input == Const.CONDITION_ALLY_SHIP) {  //its ally ship there
-			sector.makeNearestBlank(status);
+			ActualStatus.makeBlank(status.getNeighbors(sector, Const.NEIGHBORS_ARROUND));
 		} else if (input == Const.CONDITION_SOME_SHOT) {  //someone shot, no hit
 			switch (log) {  //before:
 			case Const.CONDITION_ENEMY_SHIP:
@@ -146,7 +147,7 @@ public class Jenny {
 				break;
 			case Const.CONDITION_UNKNOWN:  //something destroyed enemy ship (special bomb/enemy)
 			case Const.CONDITION_OUR_SHOT:  //last shot succeded - continue in shoting around
-				ActualStatus.makeNextShot(status.getNeighbors(sector, 1) );
+				ActualStatus.makeNextShot(status.getNeighbors(sector, Const.NEIGHBORS_LINEAR) );
 				break;
 			case Const.CONDITION_BLANK:
 				break;
@@ -158,23 +159,18 @@ public class Jenny {
 		} else if (input == Const.CONDITION_UNKNOWN) {  //unknown - in log is our logic
 			switch (log) {
 			case Const.CONDITION_ALLY_SHIP:
+			case Const.CONDITION_ENEMY_SUNK:
+			case Const.CONDITION_ALLY_SUNK:
 			case Const.CONDITION_OUR_SHOT:
 			case Const.CONDITION_ENEMY_SHOT:
-			case Const.CONDITION_ALLY_SUNK:
-			case Const.CONDITION_ENEMY_SUNK:
-				sector.setStats(log,null);  //problems with system input - loadead from default
-				break;
-			case Const.CONDITION_ENEMY_SHIP:  
-				sector.setStats(log,null);
+				if (Const.DEBUG) {  //only for offline version
+					sector.setStats(log,null);
+				}
 				break;
 			case Const.CONDITION_BLANK:
-				sector.setStats(log,null);
-				break;
+			case Const.CONDITION_ENEMY_SHIP:
 			case Const.CONDITION_NEXT_SHOT:
-				sector.setStats(log,null);
-				break;
-			default: //copy from input
-				break;
+				sector.setStats(log,null);  //copy old results from log
 			}
 		}
 	}
@@ -287,7 +283,7 @@ public class Jenny {
 			while ((currentLine = br.readLine()) != null) {  //citanie riadkov
 				if (battlefieldRow<15 && currentLine.length() ==14) {  
 					for (int column = 0; column<currentLine.length(); column++) {  //citanie znakov v riadku
-						status.battlefield[column][battlefieldRow] = new Sector(parseCondition(currentLine.charAt(column)) , column, battlefieldRow);
+						status.setSector(parseCondition(currentLine.charAt(column)), column, battlefieldRow);
 					}
 					battlefieldRow++;
 				} else {

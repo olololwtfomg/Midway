@@ -56,19 +56,13 @@ public class ActualStatus {
 		this.battlefield[column][battlefieldRow] = new Sector(logCondition, column, battlefieldRow);
 	}
 
-	public List<Sector> getNeighbors(Sector home, int mode) {  //1 for linear, 2 linear+diagonal
-		if (!(mode == 1 || mode == 2)) {
-			System.err.println("ROUND " + this.getRound() + " Bad parameter for getNeighbors: " + mode);
-			return null;
-		}
+	public List<Sector> getNeighbors(Sector home, int[][] neighborsRelative) {  //neighbors in format { { x,y } } - relative to home
 		List<Sector> list = new ArrayList<Sector>();
-		//                                  north                                  south                                west                                  east        
-		int[][] nearestPos = { { home.getXPos(),home.getYPos()-1 }, { home.getXPos(),home.getYPos()+1 }, { home.getXPos()-1,home.getYPos() }, { home.getXPos()+1,home.getYPos() }
-		//        northeast                                   southeast                                southwest                               northwest
-		, {home.getXPos()+1,home.getYPos()-1}, { home.getXPos()+1, home.getYPos()+1 }, { home.getXPos()-1, home.getYPos()+1 }, { home.getXPos()-1, home.getYPos()+1 } };
-		for (int i = 0; i<mode*4; i++) {
-			if ( nearestPos[i][0] < 14 && nearestPos[i][0] >= 0 && nearestPos[i][1] <14 && nearestPos[i][1] >= 0) {
-				list.add(this.battlefield[nearestPos[i][0] ] [ nearestPos[i][1] ]);
+		for (int[] pos : neighborsRelative) {
+			int x = pos[0] + home.getXPos();
+			int y = pos[1] + home.getYPos();
+			if ( x < 14 && x >= 0 && y <14 && y >= 0) {
+				list.add(this.getSector(x, y));
 			}
 		}
 		return list.size() > 0 ? list : null;
@@ -78,11 +72,50 @@ public class ActualStatus {
 		if (list == null) return;
 		for (Sector actual: list) {
 			if (actual.getCondition() == Const.CONDITION_UNKNOWN) {
+				if (Const.DEBUG) System.err.println("Sector x" + actual.getXPos() + " y" + actual.getYPos() + " last condition: " + actual.getCondition() + " as next shot now."); 
 				actual.setStats(Const.CONDITION_NEXT_SHOT, null);
-				if (Const.DEBUG) System.err.println("Sector as next shot: x" + actual.getXPos() + " y" + actual.getYPos() + " set to priority " + actual.getPriority()); 
 			}
-		}		
+		}	
 	}
+
+	public static void makeBlank(List<Sector> list) {
+		if (list == null) return;
+		for (Sector actual: list) {
+			switch (actual.getCondition()) {
+			case Const.CONDITION_UNKNOWN:
+			case Const.CONDITION_NEXT_SHOT:  //can by set while iterating
+				if (Const.DEBUG) System.err.println("Sector x" + actual.getXPos() + " y" + actual.getYPos() + " last condition: " + actual.getCondition() + " as blank now.");
+				actual.setStats(Const.CONDITION_BLANK, null);
+			}
+		}
+	}
+
+	public static boolean goodForBomb(List<Sector> list)
+	{
+		if (list == null) return false;
+		int votes = 0;
+		for (Sector actual: list) {
+			switch(actual.getCondition()) {
+			//proste ani za boha v tychto pripadoch
+			case Const.CONDITION_ALLY_SHIP:
+			case Const.CONDITION_ALLY_SUNK:
+				return false;
+			case Const.CONDITION_UNKNOWN:
+			case Const.CONDITION_BLANK:
+			case Const.CONDITION_ENEMY_SHIP:
+				votes++;
+			default:
+				votes+=0;
+			}
+		}
+		if (votes>=2){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+
 
 	public int getRound() {
 		return this.round;
