@@ -21,7 +21,7 @@ public class Strategies {
 			status.setAction(actionSector.getXPos(), actionSector.getYPos(),  action); 
 			return;
 		}
-		setGridPriorities();  //gridMin - gridMin+4*gridDiff
+		setGridPriorities();  //gridMin - gridMin+5*gridDiff
 		
 		selectHighestPriorSectors();
 		actionSector = selectRandomFromList();
@@ -40,7 +40,6 @@ public class Strategies {
 	public static int getGridLvlForSector(Sector sector) {
 		int xDiff = sector.getXPos()%3;
 		int yDiff = sector.getYPos()%3;
-		
 		if (xDiff == 2 && yDiff == 2) {
 			return 4;
 		} 
@@ -52,7 +51,7 @@ public class Strategies {
 		} 
 		if ((Math.abs(sector.getXPos()-sector.getYPos()) % 3) == 2) {
 			return 1;
-		}  
+		}
 		return 0;
 	}
 	
