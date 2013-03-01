@@ -25,6 +25,7 @@ public class Strategies {
 	private static void findShips(List<Sector> enemyShips) {
 		List<Sector> neighbors;
 		List<Sector> blanks = new ArrayList<Sector>();
+		Sector temp;
 		for (Sector sunken: enemyShips) {
 
 			//basic finding
@@ -36,12 +37,13 @@ public class Strategies {
 				case Const.CONDITION_BLANK:
 				case Const.CONDITION_SOME_SHOT: //luck proof
 					for (int i = -1; i<=1; i+=2) {
-						blanks.add(status.getSector(
+						temp = status.getSector(
 								(neighbor.getXPos() - sunken.getXPos()) == 0 ? (sunken.getXPos() + i) : neighbor.getXPos(), 
 										(neighbor.getYPos() - sunken.getYPos()) == 0 ? (sunken.getYPos() + i) : neighbor.getYPos() 
-								));
-						ActualStatus.makeBlank(blanks);
+								);
+						if (temp != null) blanks.add(temp);
 					}
+					ActualStatus.makeBlank(blanks);
 					break;
 				case Const.CONDITION_ENEMY_SUNK:
 					break;

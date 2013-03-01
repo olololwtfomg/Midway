@@ -51,7 +51,11 @@ public class ActualStatus {
 		return PosBest;
 	}
 	public Sector getSector(int x, int y) {
-		return this.battlefield[x][y];
+		if (isInRange(x, y)) return this.battlefield[x][y];
+		return null;
+	}
+	public boolean isInRange(int x, int y) {
+		return (x < StatusConsts.SECTOR_SIZE && x >= 0 && y < StatusConsts.SECTOR_SIZE && y >= 0);
 	}
 	public void setSector(int logCondition, int priorTemp, int column, int battlefieldRow) {
 		this.battlefield[column][battlefieldRow] = new Sector(logCondition, priorTemp, column, battlefieldRow);
@@ -65,7 +69,7 @@ public class ActualStatus {
 		for (int[] pos : neighborsRelative) {
 			int x = pos[0] + home.getXPos();
 			int y = pos[1] + home.getYPos();
-			if ( x < 14 && x >= 0 && y <14 && y >= 0) {
+			if (isInRange(x,y)) {
 				list.add(this.getSector(x, y));
 			}
 		}
