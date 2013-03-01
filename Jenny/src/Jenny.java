@@ -325,16 +325,11 @@ public class Jenny {
 	private static int parseCondition(char charAt) {
 		int condition = 0;
 
-		//1 for own ship, 2 for enemy ship
-		//3 for unknown shot, 4 for own shot, 5 for enemy shot
-		//6 for ally ship hit, 7 for enemy ship hit,
-		//8 for lowest priority, 9 for high priority, 0 for unknown
-
 		switch (charAt) {
 		case '1':
 			condition = Const.CONDITION_ALLY_SHIP; break;  //ally ship, floating
 		case '2':
-			condition = Const.CONDITION_ENEMY_SHIP; break;  //enemy ship = max priority
+			condition = Const.CONDITION_BLANK; break;  //probably blank sector
 		case '3':          //bad sector in log
 		case '.':
 			condition = Const.CONDITION_SOME_SHOT; break;  //nothing, hit
@@ -349,9 +344,9 @@ public class Jenny {
 		case '+':
 			condition = Const.CONDITION_ENEMY_SUNK; break;  //enemy ship, sunk
 		case '8':
-			condition = Const.CONDITION_BLANK; break;  //probably blank sector
-		case '9':
 			condition = Const.CONDITION_NEXT_SHOT; break;  //next round shot
+		case '9':
+			condition = Const.CONDITION_ENEMY_SHIP; break;  //enemy ship = max priority
 		case ' ':
 			condition = Const.CONDITION_UNKNOWN; break;  //unknown
 		}

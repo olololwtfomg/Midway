@@ -81,7 +81,7 @@ public class ActualStatus {
 		if (list == null) return;
 		for (Sector actual: list) {
 			if (actual.getCondition() == Const.CONDITION_UNKNOWN) {
-				if (Const.DEBUG) System.err.println("Sector x" + actual.getXPos() + " y" + actual.getYPos() + " last condition: " + actual.getCondition() + " as next shot now."); 
+				if (Const.HARD_DEBUG) System.err.println("Sector x" + actual.getXPos() + " y" + actual.getYPos() + " last condition: " + actual.getCondition() + " as next shot now."); 
 				actual.setStats(Const.CONDITION_NEXT_SHOT, null);
 			}
 		}	
@@ -93,7 +93,7 @@ public class ActualStatus {
 			switch (actual.getCondition()) {
 			case Const.CONDITION_UNKNOWN:
 			case Const.CONDITION_NEXT_SHOT:  //can by set while iterating
-				if (Const.DEBUG) System.err.println("Sector x" + actual.getXPos() + " y" + actual.getYPos() + " last condition: " + actual.getCondition() + " as blank now.");
+				if (Const.HARD_DEBUG) System.err.println("Sector x" + actual.getXPos() + " y" + actual.getYPos() + " last condition: " + actual.getCondition() + " as blank now.");
 				actual.setStats(Const.CONDITION_BLANK, null);
 			}
 		}
