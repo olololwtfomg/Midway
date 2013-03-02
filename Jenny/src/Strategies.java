@@ -13,23 +13,21 @@ public class Strategies {
 		status = stats;
 		Sector actionSector;
 
-		findShips();
+		setShips();
 
 		//if there is something with condition from previous round shot at it:
 		setGridPriorities();  //gridMin - gridMin+5*gridDiff
 
-		actionSector = selectRandomFromList(getHighestSectors(true));
+		actionSector = selectRandomFromList(getHighestSectors());
 		status.setAction(actionSector.getXPos(), actionSector.getYPos(), Const.ACTION_SHOT);
 	}
 
-	private static void findShips() {
+	private static void setShips() {
 		List<Sector> enemyShips = getSectors(Const.CONDITION_ENEMY_SUNK, false);
 		List<Sector> neighbors;
 		List<Sector> blanks = new ArrayList<Sector>();
-		EnemyShip temp;
 		for (Sector sunken: enemyShips) {
-			if (!sunken.isEnemyShip()) temp = new EnemyShip(sunken);
-			else temp = null;
+			status.addShip(sunken);
 			//basic finding
 			neighbors = status.getNeighbors(sunken, Const.NEIGHBORS_LINEAR);
 			for (Sector neighbor: neighbors) {
@@ -52,16 +50,9 @@ public class Strategies {
 					break;
 				}
 			}
-			neighbors = status.getNeighbors(sunken,  Const.NEIGHBORS_LINEAR);
-			for (Sector neighbor : neighbors) {
-				switch (neighbor.getCondition()) {
-				case Const.CONDITION_ENEMY_SUNK:
-				}
-			}
 			//advanced finding (neighbor one step away)
-			
+
 		}
-//		enemyShips = getSectorsByCondition(Const.CONDITION_ENEMY_SHIP);
 
 	}
 
@@ -71,6 +62,7 @@ public class Strategies {
 		while((actual = iterator.nextSector()) != null) {
 			if (actual.isSectorKnown()) continue;
 			actual.setStats(null, (Const.PRIOR_GRID_MIN + getGridLvlForSector(actual)*Const.PRIORITY_DIFF ) );
+			if (actual.isEnemyShip()) System.err.println("enemy ship at: x"+ actual.getXPos() + " y" + actual.getYPos());
 		}
 	}
 
@@ -124,19 +116,17 @@ public class Strategies {
 		}
 		return tempList;
 	}
-	
 
-	private static List<Sector> getHighestSectors(boolean includeNextShot) {
+	/**
+	 * can return even known sectors
+	 */
+	private static List<Sector> getHighestSectors() {
 		List<Sector> tempList = new ArrayList<Sector>();
 		SectorIterator iterator = new SectorIterator(status);
 		Sector actual;
-		boolean foundNextShot = false;
 		int priorMax = 0;
 		while ((actual = iterator.nextSector()) != null) {
-			if ( includeNextShot && (actual.getCondition() == Const.CONDITION_NEXT_SHOT)) {
-				if (!foundNextShot) { tempList.clear(); foundNextShot = true; }
-				tempList.add(actual);
-			} else if ((actual.getPriority() >= priorMax) && !foundNextShot) {
+			if ((actual.getPriority() >= priorMax)) {
 				if (actual.getPriority() > priorMax) { tempList.clear(); priorMax = actual.getPriority(); }
 				tempList.add(actual);
 			}

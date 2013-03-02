@@ -13,14 +13,15 @@ public interface Const {
 	public static final int CONDITION_ENEMY_SHOT=5;  //extends SOME_SHOT
 	public static final int CONDITION_ALLY_SUNK=6;
 	public static final int CONDITION_ENEMY_SUNK=7;
-	public static final int CONDITION_NEXT_SHOT=8;  //high priority
+//	public static final int CONDITION_NEXT_SHOT=8;  //high priority
 	public static final int CONDITION_UNKNOWN=0;  //possible for shot
 	
 	public static final int PRIORITY_BLANK = 0;
 	public static final int PRIOR_ENEMY_SHIP = 100; //status for known ships positions
+	public static final int PRIOR_NEXT_SHOT = 50;
 	public static final int PRIOR_DEFAULT = 5;
 	public static final int PRIORITY_DIFF = 5;
-	public static final int PRIOR_GRID_MIN = 10;  //max = min + (grid+1)*diff; 10+(4+1)*5 == 35 
+	public static final int PRIOR_GRID_MIN = 10;  //max = min + (grid+1)*diff; 10+(4+1)*5 == 35
 	
 	public static final int[][] NEIGHBORS_LINEAR = { {0, -1}, {0, 1}, { -1, 0}, {1, 0} };
 	public static final int[][] NEIGHBORS_LINEAR_STEP = { {0, -2}, {0, 2}, {-2, 0}, {2, 0} };

@@ -26,6 +26,17 @@ public class EnemyShip {
 		// TODO Auto-generated constructor stub
 	}
 	
+	public void addSector(Sector sector) {
+		this.position.add(sector);
+	}
+	
+	public boolean havePartOn(Sector sector) {
+		for (Sector shipPosition: position) {
+			if (shipPosition == sector) return true;
+		}
+		return false;
+	}
+	
 	public void addPosition(Sector sector) {
 		
 	}

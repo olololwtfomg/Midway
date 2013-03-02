@@ -20,9 +20,6 @@ public class Sector {
 	
 	int heurValue= 0; //for heuristics
 
-	public Sector(int condition) {
-		this.condition = condition;
-	}
 	public Sector(int condition, int x, int y) {
 		this.condition = condition;
 		this.xPos = x;
@@ -42,6 +39,10 @@ public class Sector {
 	}
 	public int getCondition() {
 		return this.condition;
+	}
+	
+	public void setEnemyShip() {
+		this.enemyShip = true;
 	}
 	public boolean isEnemyShip() {
 		return this.enemyShip;

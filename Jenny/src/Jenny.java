@@ -152,8 +152,6 @@ public class Jenny {
 				break;
 			case Const.CONDITION_BLANK:
 				break;
-			case Const.CONDITION_NEXT_SHOT:  //special bomb succeded
-				break;
 			default:  //enemy destroyed own ship
 				break;
 			}
@@ -342,24 +340,10 @@ public class Jenny {
 		case '7':
 		case '+':
 			condition = Const.CONDITION_ENEMY_SUNK; break;  //enemy ship, sunk
-		case '8':
-			condition = Const.CONDITION_NEXT_SHOT; break;  //next round shot
+		case '0':
 		case ' ':
 			condition = Const.CONDITION_UNKNOWN; break;  //unknown
 		}
 		return condition;
 	}
-
-	/*
-		for (int row = 0; row<status.battlefield.length;row++) {
-			for (int column = 0; column<status.battlefield[0].length;column++) {
-
-			}
-		}
-		return null;
-
-	}
-
-	 */
-
 }

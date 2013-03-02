@@ -60,8 +60,10 @@ public class ActualStatus {
 	public void setSector(int logCondition, int column, int battlefieldRow) {
 		this.battlefield[column][battlefieldRow] = new Sector(logCondition, column, battlefieldRow);
 	}
+	
 	public void setGrid(int grid) { this.defaultGrid = grid; }
 	public int getGrid() { return this.defaultGrid; }
+	
 	public List<Sector> getNeighbors(Sector home, int[][] neighborsRelative) {  //neighbors in format { { x,y } } - relative to home
 		List<Sector> list = new ArrayList<Sector>();
 		for (int[] pos : neighborsRelative) {
@@ -83,8 +85,8 @@ public class ActualStatus {
 		if (list == null) return;
 		for (Sector actual: list) {
 			if (actual.getCondition() == Const.CONDITION_UNKNOWN) {
-				if (Const.HARD_DEBUG) System.err.println("Sector x" + actual.getXPos() + " y" + actual.getYPos() + " last condition: " + actual.getCondition() + " as next shot now."); 
-				actual.setStats(Const.CONDITION_NEXT_SHOT, null);
+				if (Const.HARD_DEBUG) System.err.println("Sector x" + actual.getXPos() + " y" + actual.getYPos() + " as next shot now."); 
+				actual.setStats(Const.CONDITION_UNKNOWN, Const.PRIOR_NEXT_SHOT);
 			}
 		}	
 	}
@@ -92,9 +94,7 @@ public class ActualStatus {
 	public static void makeBlank(List<Sector> list) {
 		if (list == null) return;
 		for (Sector actual: list) {
-			switch (actual.getCondition()) {
-			case Const.CONDITION_UNKNOWN:
-			case Const.CONDITION_NEXT_SHOT:  //can by set while iterating
+			if (actual.getCondition() == Const.CONDITION_UNKNOWN) {
 				if (Const.HARD_DEBUG) System.err.println("Sector x" + actual.getXPos() + " y" + actual.getYPos() + " last condition: " + actual.getCondition() + " as blank now.");
 				actual.setStats(Const.CONDITION_BLANK, Const.PRIORITY_BLANK);
 			}
@@ -126,7 +126,32 @@ public class ActualStatus {
 			return false;
 		}
 	}
-
+	
+	public void addShip(Sector sector) {
+		List<Sector> neighbors = this.getNeighbors(sector, Const.NEIGHBORS_LINEAR);
+		boolean inserted = false;
+		for (Sector neighbor: neighbors) {
+			if (neighbor.getCondition() == Const.CONDITION_ENEMY_SUNK && neighbor.isEnemyShip()) {
+				this.getEnemyShipBySector(neighbor).addSector(sector);
+				inserted = true;
+			}
+		}
+		if (!inserted) enemyShipsList.add(new EnemyShip(sector));
+		sector.setEnemyShip();
+		System.err.println("adding ship at x" + sector.getXPos() + " y" + sector.getYPos());
+		System.err.println("enemyShipsList " + enemyShipsList.size());
+	}
+	
+	/**
+	 * 
+	 * @param sector - check if sector is enemyShip before
+	 */
+	public EnemyShip getEnemyShipBySector(Sector sector) {
+		for (EnemyShip ship: enemyShipsList) {
+			if (ship.havePartOn(sector)) return ship;
+		}
+		return null;
+	}
 
 	public int getRound() {
 		return this.round;
@@ -156,6 +181,7 @@ public class ActualStatus {
 		case Const.ACTION_TORPEDO:
 			if (this.specialShots==0) return false;
 		case Const.ACTION_FIREWORK:
+			
 			if (this.specialShots==0) return false;
 		default:
 			return false;
