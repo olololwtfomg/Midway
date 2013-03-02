@@ -14,7 +14,7 @@ public class Sector {
 	private int yPos = 0;  //row
 
 	private int condition = 0;
-	private EnemyShip enemyShip;
+	private boolean enemyShip = false;
 	private int priority = Const.PRIOR_DEFAULT;  //0 - 100 ... 0 for blank, 50 standard shot, 80 high priority
 	//set priority only to unknown sectors ... condition is superior else (not secured in setstats)
 	
@@ -43,6 +43,9 @@ public class Sector {
 	public int getCondition() {
 		return this.condition;
 	}
+	public boolean isEnemyShip() {
+		return this.enemyShip;
+	}
 	public void setStats(Integer newCondition, Integer newPriority) {
 		if (newCondition != null) this.condition = newCondition;
 		if (newPriority != null) this.priority = newPriority;
@@ -67,7 +70,7 @@ public class Sector {
 			case Const.CONDITION_ALLY_SHIP:
 			case Const.CONDITION_ALLY_SUNK: 
 				retval=Heuristic.OWN_SHIP; break;
-			case Const.CONDITION_ENEMY_SHIP: retval=Heuristic.ENEMY_SHIP; break;
+//			case Const.CONDITION_ENEMY_SHIP: retval=Heuristic.ENEMY_SHIP; break;
 			case Const.CONDITION_SOME_SHOT: 
 			case Const.CONDITION_ENEMY_SHOT: 
 			case Const.CONDITION_OUR_SHOT: 
@@ -83,20 +86,12 @@ public class Sector {
 	}
 	
 	public boolean isSectorKnown() {
-		return this.getCondition() != Const.CONDITION_UNKNOWN && this.getCondition() != Const.CONDITION_NEXT_SHOT && this.getCondition() != Const.CONDITION_ENEMY_SHIP;
+		return this.getCondition() != Const.CONDITION_UNKNOWN;
 	}
 	public void shot() {
-		if (!this.isSectorKnown() || this.condition == Const.CONDITION_BLANK) { this.setStats(Const.CONDITION_OUR_SHOT, null); }
+		this.setStats(Const.CONDITION_OUR_SHOT, Const.PRIOR_DEFAULT);
 	}
-	
-	public void setEnemyShip(EnemyShip enemyShip) {
-		this.enemyShip = enemyShip;
-	}
-	
-	public boolean isEnemyShip() {
-		return this.enemyShip != null;
-	}
-	
+		
 	public List<Sector> getArroundEnemyShips(ActualStatus status) {
 		List<Sector> list = new ArrayList<Sector>();
 		

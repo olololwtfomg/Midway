@@ -28,6 +28,11 @@ public class Jenny {
 		Stopwatch watch = new Stopwatch(true);///////////////////
 		/////////////////////////////////////////////////////
 		loadLog(loadStatus());
+		
+		for (String argument: args) {
+			if (argument == "grid4") status.setGrid(4);
+			else status.setGrid(3);
+		}
 
 		Strategies.doSomeLogic(status);
 		saveStatusToLog();
@@ -122,12 +127,10 @@ public class Jenny {
 			ActualStatus.makeBlank(status.getNeighbors(sector, Const.NEIGHBORS_ARROUND));
 		} else if (input == Const.CONDITION_SOME_SHOT) {  //someone shot, no hit
 			switch (log) {  //before:
-			case Const.CONDITION_ENEMY_SHIP:
 			case Const.CONDITION_BLANK:
-			case Const.CONDITION_NEXT_SHOT:
 			case Const.CONDITION_UNKNOWN:
 				//check if we shot (torpedo or firework) this way else its enemy shot
-				sector.setStats(Const.CONDITION_ENEMY_SHOT, null);
+				sector.setStats(Const.CONDITION_ENEMY_SHOT, Const.PRIOR_DEFAULT);
 				break;
 			case Const.CONDITION_OUR_SHOT:  //old our shot
 			case Const.CONDITION_ENEMY_SHOT:  //old enemy shot
@@ -143,8 +146,6 @@ public class Jenny {
 			}
 		} else if (input == Const.CONDITION_ENEMY_SUNK) {  //enemy ship sunken
 			switch (log) {
-			case Const.CONDITION_ENEMY_SHIP:  //cool logic - reapeat and won
-				break;
 			case Const.CONDITION_UNKNOWN:  //something destroyed enemy ship (special bomb/enemy)
 			case Const.CONDITION_OUR_SHOT:  //last shot succeded - continue in shoting around
 				ActualStatus.makeNextShot(status.getNeighbors(sector, Const.NEIGHBORS_LINEAR) );
@@ -164,13 +165,11 @@ public class Jenny {
 			case Const.CONDITION_OUR_SHOT:
 			case Const.CONDITION_ENEMY_SHOT:
 				if (Const.DEBUG) {  //only for offline version
-					sector.setStats(log,null);
+					sector.setStats(log,Const.PRIOR_DEFAULT);
 				}
 				break;
 			case Const.CONDITION_BLANK:
-			case Const.CONDITION_ENEMY_SHIP:
-			case Const.CONDITION_NEXT_SHOT:
-				sector.setStats(log,null);  //copy old results from log
+				sector.setStats(log,Const.PRIORITY_BLANK);  //copy old results from log
 			}
 		}
 	}
@@ -345,8 +344,6 @@ public class Jenny {
 			condition = Const.CONDITION_ENEMY_SUNK; break;  //enemy ship, sunk
 		case '8':
 			condition = Const.CONDITION_NEXT_SHOT; break;  //next round shot
-		case '9':
-			condition = Const.CONDITION_ENEMY_SHIP; break;  //enemy ship = max priority
 		case ' ':
 			condition = Const.CONDITION_UNKNOWN; break;  //unknown
 		}

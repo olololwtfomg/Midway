@@ -15,6 +15,7 @@ public class EnemyShip {
 	public static final int SIZE_5x1 = 5;
 	public static final int SIZE_2x3 = 6;
 	
+	
 	private int size = SIZE_UNKNOWN;
 	private int orientation = ORIENTATION_UNKNOWN;
 	

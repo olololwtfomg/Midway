@@ -6,6 +6,7 @@ import usedConsts.StatusConsts;
 
 public class ActualStatus {
 
+	private int defaultGrid = 3;
 	public int side=0;
 	public int round = 1;
 	public int roundsToEnd = 0;
@@ -51,11 +52,7 @@ public class ActualStatus {
 		return PosBest;
 	}
 	public Sector getSector(int x, int y) {
-		if (isInRange(x, y)) return this.battlefield[x][y];
-		return null;
-	}
-	public boolean isInRange(int x, int y) {
-		return (x < StatusConsts.SECTOR_SIZE && x >= 0 && y < StatusConsts.SECTOR_SIZE && y >= 0);
+		return this.battlefield[x][y];
 	}
 	public void setSector(int logCondition, int priorTemp, int column, int battlefieldRow) {
 		this.battlefield[column][battlefieldRow] = new Sector(logCondition, priorTemp, column, battlefieldRow);
@@ -63,13 +60,14 @@ public class ActualStatus {
 	public void setSector(int logCondition, int column, int battlefieldRow) {
 		this.battlefield[column][battlefieldRow] = new Sector(logCondition, column, battlefieldRow);
 	}
-
+	public void setGrid(int grid) { this.defaultGrid = grid; }
+	public int getGrid() { return this.defaultGrid; }
 	public List<Sector> getNeighbors(Sector home, int[][] neighborsRelative) {  //neighbors in format { { x,y } } - relative to home
 		List<Sector> list = new ArrayList<Sector>();
 		for (int[] pos : neighborsRelative) {
 			int x = pos[0] + home.getXPos();
 			int y = pos[1] + home.getYPos();
-			if (isInRange(x,y)) {
+			if (x < StatusConsts.SECTOR_SIZE && x >= 0 && y < StatusConsts.SECTOR_SIZE && y >= 0) {
 				list.add(this.getSector(x, y));
 			}
 		}
@@ -98,7 +96,7 @@ public class ActualStatus {
 			case Const.CONDITION_UNKNOWN:
 			case Const.CONDITION_NEXT_SHOT:  //can by set while iterating
 				if (Const.HARD_DEBUG) System.err.println("Sector x" + actual.getXPos() + " y" + actual.getYPos() + " last condition: " + actual.getCondition() + " as blank now.");
-				actual.setStats(Const.CONDITION_BLANK, null);
+				actual.setStats(Const.CONDITION_BLANK, Const.PRIORITY_BLANK);
 			}
 		}
 	}
@@ -115,7 +113,7 @@ public class ActualStatus {
 				return false;
 			case Const.CONDITION_UNKNOWN:
 			case Const.CONDITION_BLANK:
-			case Const.CONDITION_ENEMY_SHIP:
+//			case Const.CONDITION_ENEMY_SHIP:
 				votes++;
 			default:
 				votes+=0;
