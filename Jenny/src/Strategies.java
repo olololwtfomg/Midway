@@ -18,7 +18,7 @@ public class Strategies {
 		//if there is something with condition from previous round shot at it:
 		setGridPriorities();  //gridMin - gridMin+5*gridDiff
 
-		actionSector = selectRandomFromList(getHighestSectors());
+		actionSector = getRandomSectorByPriority();
 		status.setAction(actionSector.getXPos(), actionSector.getYPos(), Const.ACTION_SHOT);
 	}
 
@@ -116,11 +116,34 @@ public class Strategies {
 		}
 		return tempList;
 	}
+	
+	private static Sector getRandomSectorByPriority() {
+		List<Sector> highest = new ArrayList<Sector>();
+		List<Sector> noise = new ArrayList<Sector>();
+		SectorIterator iterator = new SectorIterator(status);
+		Sector actual;
+		int priorMax = 0;
+		int priorNoise = 0;
+		while ((actual = iterator.nextSector()) != null) {
+			if (actual.getPriority() >= priorMax && actual.getCondition() == Const.CONDITION_UNKNOWN) {
+				if (actual.getPriority() > priorMax) { highest.clear(); priorMax = actual.getPriority(); System.err.println("High reseted"); }
+				highest.add(actual);
+			}
+		}
+		iterator.reset();
+		while ((actual=iterator.nextSector()) != null) {
+			if (actual.getPriority() >= priorNoise && actual.getPriority() < priorMax && actual.getCondition() == Const.CONDITION_UNKNOWN) {
+				if (actual.getPriority() > priorNoise) { noise.clear(); priorNoise = actual.getPriority(); }
+				noise.add(actual);
+			}
+		}
+		return selectRandomFromList(( (new Random().nextInt(100)) >= Const.NOISE_CHANCE) ? highest : noise);
+	}
 
 	/**
 	 * can return even known sectors
 	 */
-	private static List<Sector> getHighestSectors() {
+	public static List<Sector> getHighestSectors() {
 		List<Sector> tempList = new ArrayList<Sector>();
 		SectorIterator iterator = new SectorIterator(status);
 		Sector actual;

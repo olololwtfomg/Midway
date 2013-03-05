@@ -23,6 +23,11 @@ public interface Const {
 	public static final int PRIORITY_DIFF = 5;
 	public static final int PRIOR_GRID_MIN = 10;  //max = min + (grid+1)*diff; 10+(4+1)*5 == 35
 	
+	/**
+	 * in percent
+	 */
+	public static final int NOISE_CHANCE = 15;
+	
 	public static final int[][] NEIGHBORS_LINEAR = { {0, -1}, {0, 1}, { -1, 0}, {1, 0} };
 	public static final int[][] NEIGHBORS_LINEAR_STEP = { {0, -2}, {0, 2}, {-2, 0}, {2, 0} };
 	public static final int[][] NEIGHBORS_DIAGONAL = { {1, -1}, {1, 1}, {-1, 1}, {-1, -1} };
