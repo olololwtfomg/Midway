@@ -13,21 +13,20 @@ public class Sector {
 	private int xPos = 0;  //column
 	private int yPos = 0;  //row
 
-	private int condition = 0;
+	private State state;
 	private boolean enemyShip = false;
-	private int priority = Const.PRIOR_DEFAULT;  //0 - 100 ... 0 for blank, 50 standard shot, 80 high priority
-	//set priority only to unknown sectors ... condition is superior else (not secured in setstats)
+	
+	/**
+	 * shot, bomb, torpedo, firework
+	 */
+	private int[] priorities = new int[] { Const.PRIOR_DEFAULT, 0, 0, 0 };
+	private char torpedoDir;
+	//priority for known sectors only for firework and torpedo
 	
 	int heurValue= 0; //for heuristics
 
-	public Sector(int condition, int x, int y) {
-		this.condition = condition;
-		this.xPos = x;
-		this.yPos = y;
-	}
-	public Sector(int condition, int priority, int x, int y) {
-		this.condition = condition;
-		this.priority = priority;
+	public Sector(State state, int x, int y) {
+		this.state = state;
 		this.xPos = x;
 		this.yPos = y;
 	}
@@ -37,8 +36,8 @@ public class Sector {
 	public int getYPos() {
 		return this.yPos;
 	}
-	public int getCondition() {
-		return this.condition;
+	public State getState() {
+		return this.state;
 	}
 	
 	public void setEnemyShip() {
@@ -47,13 +46,42 @@ public class Sector {
 	public boolean isEnemyShip() {
 		return this.enemyShip;
 	}
-	public void setStats(Integer newCondition, Integer newPriority) {
-		if (newCondition != null) this.condition = newCondition;
-		if (newPriority != null) this.priority = newPriority;
+	public void setState(State newState) {
+		this.state = newState;
 	}
+	public void setPriority(int value) {
+		this.priorities[0] = value;
+	}
+	public void addBombPriority(int value) { addPriority(1,value); }
+	public void addTorpedoPriority(int value, char dir) { addPriority(2,value); setTorpedoDir(dir); }
+	public void addFireworkPriority(int value) { addPriority(3,value); }
+	private void addPriority(int action, int value) {
+		this.priorities[action] += value;
+	}
+	public void setTorpedoDir(char dir) {
+		this.torpedoDir = dir;
+	}
+	
 	public int getPriority() {
-		return this.priority;
+		int max = 0;
+		for (int x: this.priorities) {
+			if (x>max) max = 0;
+		}
+		return max;
 	}
+
+	public int getAction() {
+		int max = 0;
+		int index = 0;
+		for (int i = 0; i>this.priorities.length; i++) {
+			if (this.priorities[i]>=max) {
+				index = i;
+				max = this.priorities[i];
+			}
+		}
+		return 'm';
+	}
+	
 	public void setHeurValue(int value)
 	{
 		this.heurValue=value;
@@ -65,21 +93,21 @@ public class Sector {
 	
 	public int getSpecialValue(){
 		int retval=0;
-		switch(this.getCondition())
+		switch(this.getState())
 		{
 		// TODO: heuristicke hodnoty pre jednotlive polia
-			case Const.CONDITION_ALLY_SHIP:
-			case Const.CONDITION_ALLY_SUNK: 
+			case ALLY_SHIP:
+			case ALLY_SUNK: 
 				retval=Heuristic.OWN_SHIP; break;
-//			case Const.CONDITION_ENEMY_SHIP: retval=Heuristic.ENEMY_SHIP; break;
-			case Const.CONDITION_SOME_SHOT: 
-			case Const.CONDITION_ENEMY_SHOT: 
-			case Const.CONDITION_OUR_SHOT: 
+//			case ENEMY_SHIP: retval=Heuristic.ENEMY_SHIP; break;
+			case SOME_SHOT: 
+			case ENEMY_SHOT: 
+			case OUR_SHOT: 
 				retval=Heuristic.MISSED; break; 
-			case Const.CONDITION_ENEMY_SUNK: 
+			case ENEMY_SUNK: 
 				retval=Heuristic.HIT; break;
-			case Const.CONDITION_BLANK:
-			case Const.CONDITION_UNKNOWN:
+			case BLANK:
+			case UNKNOWN:
 			default:
 				retval=Heuristic.UNKNOWN;
 		}
@@ -87,12 +115,13 @@ public class Sector {
 	}
 	
 	public boolean isSectorKnown() {
-		return this.getCondition() != Const.CONDITION_UNKNOWN;
+		return this.getState() != State.UNKNOWN;
 	}
+	
 	public void shot() {
-		this.setStats(Const.CONDITION_OUR_SHOT, Const.PRIOR_DEFAULT);
+		this.setState(State.OUR_SHOT);
 	}
-		
+	
 	public List<Sector> getArroundEnemyShips(ActualStatus status) {
 		List<Sector> list = new ArrayList<Sector>();
 		

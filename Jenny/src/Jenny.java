@@ -36,7 +36,7 @@ public class Jenny {
 
 		Strategies.doSomeLogic(status);
 		saveStatusToLog();
-		if (Const.TIMER) System.err.println("ROUND " + status.round + " Time: " + (watch.actualTime()/1000000) + "ms."); 
+		System.err.println("ROUND " + status.round + " Time: " + (watch.actualTime()/1000000) + "ms."); 
 		System.out.println(status.getActionWord());
 		/*
 		status.calculateHeuristics();
@@ -71,7 +71,7 @@ public class Jenny {
 				Sector actual;
 				SectorIterator iterator = new SectorIterator(status);
 				while ((actual = iterator.nextSector()) != null) {
-					if (actual.getCondition() == Const.CONDITION_ALLY_SHIP) {
+					if (actual.getState() == State.ALLY_SHIP) {
 						ActualStatus.makeBlank(status.getNeighbors(actual, Const.NEIGHBORS_ARROUND));
 					}
 				}
@@ -85,25 +85,28 @@ public class Jenny {
 
 			currentLine = br.readLine(); //last move
 
-			int logCondition = 0;
+			State logState;
 			for (int battlefieldRow = 0; battlefieldRow<StatusConsts.SECTOR_SIZE; battlefieldRow++) {
 				currentLine = br.readLine();
-				if (currentLine == null) System.err.println(" ");
+				if (currentLine == null) {
+					System.err.println("Error while reading log");
+					return;
+				}
 				for (int column = 0; column< currentLine.length() && column<StatusConsts.SECTOR_SIZE; column++) { //prechod riadkom po znakoch/sectoroch
-					logCondition = parseCondition(currentLine.charAt(column));
+					logState = State.getState(currentLine.charAt(column));
 					
 					//set priorities for unknowns
-					if (logCondition == Const.CONDITION_UNKNOWN) {
+					if (logState == State.UNKNOWN) {
 						if (priorityIndex < prioritiesLine.length) {
-							status.getSector(column, battlefieldRow).setStats(null, Integer.parseInt(prioritiesLine[priorityIndex++]));
+							status.getSector(column, battlefieldRow).setPriority(Integer.parseInt(prioritiesLine[priorityIndex++]));
 						}  //default priority sets loadStatus
 					}
 					
 					//set conditions
 					if (!badInputFile) {
-						compareInputVSLog(status.getSector(column, battlefieldRow), logCondition);								
+						compareInputVSLog(status.getSector(column, battlefieldRow), logState);								
 					} else {
-						status.getSector(column, battlefieldRow).setStats(logCondition, null);
+						status.getSector(column, battlefieldRow).setState(logState);
 					}
 					
 				}
@@ -121,53 +124,56 @@ public class Jenny {
 		}
 	}
 
-	private static void compareInputVSLog(Sector sector, int log) {
-		int input = sector.getCondition(); //status from actual input
-		if (input == Const.CONDITION_ALLY_SHIP) {  //its ally ship there
+	private static void compareInputVSLog(Sector sector, State logState) {
+		State systemState = sector.getState(); //status from actual input
+		if (systemState == State.ALLY_SHIP) {  //its ally ship there
 			ActualStatus.makeBlank(status.getNeighbors(sector, Const.NEIGHBORS_ARROUND));
-		} else if (input == Const.CONDITION_SOME_SHOT) {  //someone shot, no hit
-			switch (log) {  //before:
-			case Const.CONDITION_BLANK:
-			case Const.CONDITION_UNKNOWN:
+		} else if (systemState == State.SOME_SHOT) {  //someone shot, no hit
+			switch (logState) {  //before:
+			case BLANK:
+			case UNKNOWN:
 				//check if we shot (torpedo or firework) this way else its enemy shot
-				sector.setStats(Const.CONDITION_ENEMY_SHOT, Const.PRIOR_DEFAULT);
+				sector.setState(State.ENEMY_SHOT);
 				break;
-			case Const.CONDITION_OUR_SHOT:  //old our shot
-			case Const.CONDITION_ENEMY_SHOT:  //old enemy shot
-				sector.setStats(log, null); 
+			case OUR_SHOT:  //old our shot
+			case ENEMY_SHOT:  //old enemy shot
+				sector.setState(logState);
 				break;
-			case Const.CONDITION_SOME_SHOT:    //possible if there was problem with log in last round (copyed directly from input) or this is first round and the shot is from enemy
-				sector.setStats(Const.CONDITION_ENEMY_SHOT, null);
+			case SOME_SHOT:    //possible if there was problem with log in last round (copyed directly from input) or this is first round and the shot is from enemy
+				sector.setState(State.ENEMY_SHOT);
 				break;
+			default: break;
 			}
-		} else if (input == Const.CONDITION_ALLY_SUNK) {  //ally ship sunken
-			if (log == Const.CONDITION_ALLY_SHIP) {
+		} else if (systemState == State.ALLY_SUNK) {  //ally ship sunken
+			if (logState == State.ALLY_SHIP) {
 				//enemy new hit
 			}
-		} else if (input == Const.CONDITION_ENEMY_SUNK) {  //enemy ship sunken
-			switch (log) {
-			case Const.CONDITION_UNKNOWN:  //something destroyed enemy ship (special bomb/enemy)
-			case Const.CONDITION_OUR_SHOT:  //last shot succeded - continue in shoting around
+		} else if (systemState == State.ENEMY_SUNK) {  //enemy ship sunken
+			switch (logState) {
+			case UNKNOWN:  //something destroyed enemy ship (special bomb/enemy)
+			case OUR_SHOT:  //last shot succeded - continue in shoting around
 				ActualStatus.makeNextShot(status.getNeighbors(sector, Const.NEIGHBORS_LINEAR) );
 				break;
-			case Const.CONDITION_BLANK:
+			case BLANK:
 				break;
 			default:  //enemy destroyed own ship
 				break;
 			}
-		} else if (input == Const.CONDITION_UNKNOWN) {  //unknown - in log is our logic
-			switch (log) {
-			case Const.CONDITION_ALLY_SHIP:
-			case Const.CONDITION_ENEMY_SUNK:
-			case Const.CONDITION_ALLY_SUNK:
-			case Const.CONDITION_OUR_SHOT:
-			case Const.CONDITION_ENEMY_SHOT:
+		} else if (systemState == State.UNKNOWN) {  //unknown - in log is our logic
+			switch (logState) {
+			case ALLY_SHIP:
+			case ENEMY_SUNK:
+			case ALLY_SUNK:
+			case OUR_SHOT:
+			case ENEMY_SHOT:
 				if (Const.DEBUG) {  //only for offline version
-					sector.setStats(log,Const.PRIOR_DEFAULT);
+					sector.setState(logState);
 				}
 				break;
-			case Const.CONDITION_BLANK:
-				sector.setStats(log,Const.PRIORITY_BLANK);  //copy old results from log
+			case BLANK:
+				sector.setState(logState);
+				sector.setPriority(Const.PRIORITY_BLANK);
+			default: break;
 			}
 		}
 	}
@@ -206,10 +212,12 @@ public class Jenny {
 			StringBuffer prioritiesLine = new StringBuffer();
 			Sector actual;
 			while ((actual = iterator.nextSector()) != null) {
-				switch (actual.getCondition()) {
-				case Const.CONDITION_UNKNOWN:
+				switch (actual.getState()) {
+				case UNKNOWN:
 					if (Const.HARD_DEBUG) System.err.println("Saving priority for x" + actual.getXPos() + " y" + actual.getYPos() + " as " + actual.getPriority());
 					prioritiesLine.append(actual.getPriority() + " ");
+				default:
+					break;
 				}
 			}
 			bw.write(prioritiesLine.toString());
@@ -218,14 +226,13 @@ public class Jenny {
 			/////////////////////////////////
 			////////////////////////////////
 			///////////////////////////////
-
 			bw.write(status.getActionWord()); //last shot
 			bw.newLine();
 			StringBuffer currLine = null;
 			for (int row = 0; row<StatusConsts.SECTOR_SIZE; row++) {
 				currLine = new StringBuffer();				
 				for (int column = 0; column<StatusConsts.SECTOR_SIZE; column++) {
-					currLine.append(status.getSector(column, row).getCondition());
+					currLine.append(status.getSector(column, row).getState().getLogValue());
 				}
 				bw.write(currLine.toString());
 				bw.newLine();
@@ -280,7 +287,7 @@ public class Jenny {
 			while ((currentLine = br.readLine()) != null) {  //citanie riadkov
 				if (battlefieldRow<15 && currentLine.length() ==14) {  
 					for (int column = 0; column<currentLine.length(); column++) {  //citanie znakov v riadku
-						status.setSector(parseCondition(currentLine.charAt(column)), column, battlefieldRow);
+						status.setSector(State.getState(currentLine.charAt(column)), column, battlefieldRow);
 					}
 					battlefieldRow++;
 				} else {
@@ -314,36 +321,8 @@ public class Jenny {
 		status.specialShots = 10;
 		for (int row = 0; row<StatusConsts.SECTOR_SIZE;row++) {
 			for (int column = 0; column<StatusConsts.SECTOR_SIZE; column++) {
-				status.setSector(Const.CONDITION_UNKNOWN, column, row);
+				status.setSector(State.UNKNOWN, column, row);
 			}
 		}
-	}
-
-	private static int parseCondition(char charAt) {
-		int condition = 0;
-
-		switch (charAt) {
-		case '1':
-			condition = Const.CONDITION_ALLY_SHIP; break;  //ally ship, floating
-		case '2':
-			condition = Const.CONDITION_BLANK; break;  //probably blank sector
-		case '3':          //bad sector in log
-		case '.':
-			condition = Const.CONDITION_SOME_SHOT; break;  //nothing, hit
-		case '4':
-			condition = Const.CONDITION_OUR_SHOT; break;  //our shot on nothing  /extends 3
-		case '5':
-			condition = Const.CONDITION_ENEMY_SHOT; break;  //enemy shot on nothing  /extends 3
-		case '6':
-		case '*':
-			condition = Const.CONDITION_ALLY_SUNK; break;  //ally ship, sunk
-		case '7':
-		case '+':
-			condition = Const.CONDITION_ENEMY_SUNK; break;  //enemy ship, sunk
-		case '0':
-		case ' ':
-			condition = Const.CONDITION_UNKNOWN; break;  //unknown
-		}
-		return condition;
 	}
 }

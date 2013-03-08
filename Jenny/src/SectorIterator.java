@@ -14,6 +14,10 @@ public class SectorIterator {
 		iteratorIndex = 0;
 	}
 	
+	public boolean hasNext() {
+		return iteratorIndex < (StatusConsts.SECTOR_SIZE * StatusConsts.SECTOR_SIZE);
+	}
+	
 	public Sector nextSector() {
 		if (iteratorIndex < (StatusConsts.SECTOR_SIZE * StatusConsts.SECTOR_SIZE) ) {
 			return status.getSector(iteratorIndex % StatusConsts.SECTOR_SIZE, (int) (iteratorIndex++ / StatusConsts.SECTOR_SIZE));

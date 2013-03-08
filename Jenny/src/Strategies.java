@@ -3,6 +3,7 @@ import java.util.List;
 import java.util.Random;
 
 import usedConsts.Const;
+import usedConsts.StatusConsts;
 
 
 public class Strategies {
@@ -13,17 +14,15 @@ public class Strategies {
 		status = stats;
 		Sector actionSector;
 
-		setShips();
-
-		//if there is something with condition from previous round shot at it:
+		setEnemyShips();
 		setGridPriorities();  //gridMin - gridMin+5*gridDiff
 
 		actionSector = getRandomSectorByPriority();
-		status.setAction(actionSector.getXPos(), actionSector.getYPos(), Const.ACTION_SHOT);
+		status.executeAction(actionSector);
 	}
 
-	private static void setShips() {
-		List<Sector> enemyShips = getSectors(Const.CONDITION_ENEMY_SUNK, false);
+	private static void setEnemyShips() {
+		List<Sector> enemyShips = getSectorsByState(State.ENEMY_SUNK, false);
 		List<Sector> neighbors;
 		List<Sector> blanks = new ArrayList<Sector>();
 		for (Sector sunken: enemyShips) {
@@ -31,11 +30,11 @@ public class Strategies {
 			//basic finding
 			neighbors = status.getNeighbors(sunken, Const.NEIGHBORS_LINEAR);
 			for (Sector neighbor: neighbors) {
-				switch (neighbor.getCondition()) {
-				case Const.CONDITION_OUR_SHOT:
-				case Const.CONDITION_ENEMY_SHOT:
-				case Const.CONDITION_BLANK:
-				case Const.CONDITION_SOME_SHOT: //luck proof
+				switch (neighbor.getState()) {
+				case OUR_SHOT:
+				case ENEMY_SHOT:
+				case BLANK:
+				case SOME_SHOT: //luck proof
 					for (int i = -1; i<=1; i+=2) {
 						try {
 							blanks.add(status.getSector(
@@ -48,20 +47,61 @@ public class Strategies {
 						}
 					}
 					break;
+				default:
+					break;
 				}
 			}
 			//advanced finding (neighbor one step away)
-
 		}
-
 	}
 
+	public void calculateHeuristics()
+	{
+		Sector currSector;
+		SectorIterator iterator = new SectorIterator(status);
+		while ((currSector = iterator.nextSector()) != null) {
+			/*there's no point in calculating it over and over again
+			 * if we know it's a bad location to do an air strike*/
+			if(currSector.getHeurValue()<StatusConsts.HEUR_THRESHOLD){
+				currSector.setHeurValue(
+						calculateSectorHeuristics(currSector.getXPos(),currSector.getXPos()));
+			}			
+		}
+	}
+	private int calculateSectorHeuristics(int x, int y)
+	{
+		int value;
+		int retval=0;
+		for(int xAxis=(x-StatusConsts.HEUR_OFFSET);
+				xAxis<(x+StatusConsts.HEUR_OFFSET);
+				xAxis++){
+			for(int yAxis=y-StatusConsts.HEUR_OFFSET;
+					yAxis<(y+StatusConsts.HEUR_OFFSET);
+					yAxis++){
+				if(retval>StatusConsts.HEUR_THRESHOLD)
+				{
+					return retval;
+				}
+				try{
+					value=status.getSector(xAxis, yAxis).getSpecialValue();
+				}
+				catch(ArrayIndexOutOfBoundsException ex)
+				{
+					value=100;
+				}
+				retval+=value;
+			}
+		}
+		return retval;
+	}
+
+	
 	private static void setGridPriorities() {
 		SectorIterator iterator = new SectorIterator(status);
 		Sector actual;
 		while((actual = iterator.nextSector()) != null) {
 			if (actual.isSectorKnown()) continue;
-			actual.setStats(null, (Const.PRIOR_GRID_MIN + getGridLvlForSector(actual)*Const.PRIORITY_DIFF ) );
+			actual.setPriority((Const.PRIOR_GRID_MIN + getGridLvlForSector(actual)*Const.PRIORITY_DIFF) );
 			if (actual.isEnemyShip()) System.err.println("enemy ship at: x"+ actual.getXPos() + " y" + actual.getYPos());
 		}
 	}
@@ -105,12 +145,12 @@ public class Strategies {
 		return 0;
 	}
 
-	private static List<Sector> getSectors(int findValue, boolean findingPriority) {
+	private static List<Sector> getSectorsByState(State findState, boolean findingPriority) {
 		List<Sector> tempList = new ArrayList<Sector>();
 		SectorIterator iterator = new SectorIterator(status);
 		Sector actual;
 		while ((actual = iterator.nextSector()) != null) {
-			if ((findingPriority ? actual.getPriority() : actual.getCondition()) == findValue) {
+			if ((findingPriority ? actual.getPriority() : actual.getState()) == findState) {
 				tempList.add(actual);
 			}
 		}
@@ -125,14 +165,14 @@ public class Strategies {
 		int priorMax = 0;
 		int priorNoise = 0;
 		while ((actual = iterator.nextSector()) != null) {
-			if (actual.getPriority() >= priorMax && actual.getCondition() == Const.CONDITION_UNKNOWN) {
+			if (actual.getPriority() >= priorMax && actual.getState() == State.UNKNOWN) {
 				if (actual.getPriority() > priorMax) { highest.clear(); priorMax = actual.getPriority(); System.err.println("High reseted"); }
 				highest.add(actual);
 			}
 		}
 		iterator.reset();
 		while ((actual=iterator.nextSector()) != null) {
-			if (actual.getPriority() >= priorNoise && actual.getPriority() < priorMax && actual.getCondition() == Const.CONDITION_UNKNOWN) {
+			if (actual.getPriority() >= priorNoise && actual.getPriority() < priorMax && actual.getState() == State.UNKNOWN) {
 				if (actual.getPriority() > priorNoise) { noise.clear(); priorNoise = actual.getPriority(); }
 				noise.add(actual);
 			}
