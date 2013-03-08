@@ -12,16 +12,16 @@ import usedConsts.StatusConsts;
 public class Jenny {
 	static ActualStatus status;
 
-	private static final String INPUT_FILE_PATH = ".%sbattlefield.txt";
-	private static final String LOG_FILE_PATH = ".%slog.txt";
-	private static final String WIN_PATH_SEP = "\\";
-	private static final String UNIX_PATH_SEP = "/";
+	private static final String INPUT_FILE = "battlefield.txt";
+	private static final String LOG_FILE = "log.txt";
+	//private static final String WIN_PATH_SEP = "\\";
+	//private static final String UNIX_PATH_SEP = "/";
 
-	private enum OS_type {
+/*	private enum OS_type {
 		WINDOWS,LINUX 
 	}
 
-	private static OS_type os_type=OS_type.LINUX;
+	private static OS_type os_type=OS_type.LINUX;*/
 
 	public static void main(String[] args) {
 		/////////////////////////////////////////////////////
@@ -50,7 +50,7 @@ public class Jenny {
 	private static void loadLog(boolean badInputFile) {
 		BufferedReader br = null;
 		String currentLine = "";
-		String logFileName;
+/*		String logFileName;
 		switch(Jenny.os_type)
 		{
 		case WINDOWS:
@@ -59,10 +59,10 @@ public class Jenny {
 		default:
 			logFileName= String.format(LOG_FILE_PATH,UNIX_PATH_SEP);
 			break;
-		}
+		}*/
 
 		try {
-			File file = new File(logFileName);
+			File file = new File(LOG_FILE);
 			if (!file.isFile()) {
 				System.err.println("Log neexistuje.");
 				//log is broken ... create new based on system input
@@ -179,7 +179,7 @@ public class Jenny {
 	}
 
 	private static boolean saveStatusToLog() {
-		String logFileName;
+/*		String logFileName;
 		switch(Jenny.os_type)
 		{
 		case WINDOWS:
@@ -188,9 +188,9 @@ public class Jenny {
 		default:
 			logFileName= String.format(LOG_FILE_PATH,UNIX_PATH_SEP);
 			break;
-		}
+		}*/
 
-		File file = new File(logFileName);
+		File file = new File(LOG_FILE);
 		try {
 			if (!file.exists()) {
 				file.createNewFile();
@@ -256,7 +256,7 @@ public class Jenny {
 		BufferedReader br = null;
 		status = new ActualStatus();
 		String currentLine = "";
-		String logFileName;
+/*		String logFileName;
 		switch(Jenny.os_type)
 		{
 		case WINDOWS:
@@ -265,9 +265,9 @@ public class Jenny {
 		default:
 			logFileName= String.format(INPUT_FILE_PATH,UNIX_PATH_SEP);
 			break;
-		}
+		}*/
 		try {	//nacitanie zo suboru
-			File file = new File(logFileName);
+			File file = new File(INPUT_FILE);
 			if (!file.isFile()) {
 				System.err.println("System input file not found. Loaded default status.");
 				loadDefaultStatus();

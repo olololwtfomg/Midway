@@ -27,6 +27,7 @@ public class Sector {
 
 	public Sector(State state, int x, int y) {
 		this.state = state;
+		if (state != State.UNKNOWN) this.priorities[0] = Const.PRIORITY_BLANK;
 		this.xPos = x;
 		this.yPos = y;
 	}
