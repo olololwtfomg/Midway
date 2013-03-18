@@ -5,7 +5,6 @@ import usedConsts.Const;
 import usedConsts.Heuristic;
 
 public class Sector {
-	
 	/*
 	 * TODO: hodnoty podla pravdepodobnostneho modelu
 	 * */
@@ -14,7 +13,6 @@ public class Sector {
 	private int yPos = 0;  //row
 
 	private State state;
-	private boolean enemyShip = false;
 	
 	/**
 	 * shot, bomb, torpedo, firework
@@ -41,12 +39,6 @@ public class Sector {
 		return this.state;
 	}
 	
-	public void setEnemyShip() {
-		this.enemyShip = true;
-	}
-	public boolean isEnemyShip() {
-		return this.enemyShip;
-	}
 	public void setState(State newState) {
 		this.state = newState;
 	}

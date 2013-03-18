@@ -318,7 +318,7 @@ public class Jenny {
 	private static void loadDefaultStatus() {
 		status.side = 1;
 		status.roundsToEnd = 150;
-		status.specialShots = 10;
+		status.specialShots = 0;
 		for (int row = 0; row<StatusConsts.SECTOR_SIZE;row++) {
 			for (int column = 0; column<StatusConsts.SECTOR_SIZE; column++) {
 				status.setSector(State.UNKNOWN, column, row);

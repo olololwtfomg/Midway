@@ -86,15 +86,20 @@ public class ActualStatus {
 			}
 		}	
 	}
-
+	
+	public static void makeBlank(Sector sector) {
+		if (sector == null) return;		
+		if (sector.getState() == State.UNKNOWN) {
+			if (Const.HARD_DEBUG) System.err.println("Sector x" + sector.getXPos() + " y" + sector.getYPos() + " last condition: " + sector.getState() + " as blank now.");
+			sector.setState(State.BLANK);
+			sector.setPriority(Const.PRIORITY_BLANK);
+		}
+	}
+	
 	public static void makeBlank(List<Sector> list) {
 		if (list == null) return;
 		for (Sector actual: list) {
-			if (actual.getState() == State.UNKNOWN) {
-				if (Const.HARD_DEBUG) System.err.println("Sector x" + actual.getXPos() + " y" + actual.getYPos() + " last condition: " + actual.getState() + " as blank now.");
-				actual.setState(State.BLANK);
-				actual.setPriority(Const.PRIORITY_BLANK);
-			}
+			ActualStatus.makeBlank(actual);
 		}
 	}
 
@@ -135,25 +140,23 @@ public class ActualStatus {
 	}
 	
 	public void addShip(Sector sector) {
-		List<Sector> neighbors = this.getNeighbors(sector, Const.NEIGHBORS_LINEAR);
+		List<Sector> neighbors = this.getNeighbors(sector, Const.NEIGHBORS_BACKWARD);
 		boolean inserted = false;
 		for (Sector neighbor: neighbors) {
-			if (neighbor.getState() == State.ENEMY_SUNK && neighbor.isEnemyShip()) {
-				this.getEnemyShipBySector(neighbor).addSector(sector);
+			if (neighbor.getState() == State.ENEMY_SUNK) {
+				this.findEnemyShipBySector(neighbor).addPosition(sector);
 				inserted = true;
 			}
 		}
 		if (!inserted) enemyShipsList.add(new EnemyShip(sector));
-		sector.setEnemyShip();
-		System.err.println("adding ship at x" + sector.getXPos() + " y" + sector.getYPos());
-		System.err.println("enemyShipsList " + enemyShipsList.size());
+		if (Const.HARD_DEBUG) System.err.println("adding ship at x" + sector.getXPos() + " y" + sector.getYPos());
 	}
 	
 	/**
 	 * 
-	 * @param sector - check if sector is enemyShip before
+	 * @param sector - check if sector was added to ships list enemyShip
 	 */
-	public EnemyShip getEnemyShipBySector(Sector sector) {
+	public EnemyShip findEnemyShipBySector(Sector sector) {
 		for (EnemyShip ship: enemyShipsList) {
 			if (ship.havePartOn(sector)) return ship;
 		}

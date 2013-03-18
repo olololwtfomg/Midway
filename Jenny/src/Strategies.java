@@ -22,12 +22,14 @@ public class Strategies {
 	}
 
 	private static void setEnemyShips() {
-		List<Sector> enemyShips = getSectorsByState(State.ENEMY_SUNK, false);
+		List<Sector> enemyShips = getSectorsByState(State.ENEMY_SUNK);
 		List<Sector> neighbors;
-		List<Sector> blanks = new ArrayList<Sector>();
 		for (Sector sunken: enemyShips) {
 			status.addShip(sunken);
 			//basic finding
+		}
+		
+		for (Sector sunken: enemyShips) {
 			neighbors = status.getNeighbors(sunken, Const.NEIGHBORS_LINEAR);
 			for (Sector neighbor: neighbors) {
 				switch (neighbor.getState()) {
@@ -36,15 +38,11 @@ public class Strategies {
 				case BLANK:
 				case SOME_SHOT: //luck proof
 					for (int i = -1; i<=1; i+=2) {
-						try {
-							blanks.add(status.getSector(
-									(neighbor.getXPos() - sunken.getXPos()) == 0 ? (sunken.getXPos() + i) : neighbor.getXPos(), 
-											(neighbor.getYPos() - sunken.getYPos()) == 0 ? (sunken.getYPos() + i) : neighbor.getYPos() 
-									));
-							ActualStatus.makeBlank(blanks);
-						} catch (ArrayIndexOutOfBoundsException e) {
-							continue;
-						}
+						Sector temp = status.getSector(
+								(neighbor.getXPos() - sunken.getXPos()) == 0 ? (sunken.getXPos() + i) : neighbor.getXPos(), 
+										(neighbor.getYPos() - sunken.getYPos()) == 0 ? (sunken.getYPos() + i) : neighbor.getYPos() 
+								); //sektor kolmo na sunken a neighbor
+						if (temp != null) ActualStatus.makeBlank(temp);
 					}
 					break;
 				default:
@@ -102,7 +100,6 @@ public class Strategies {
 		while((actual = iterator.nextSector()) != null) {
 			if (actual.isSectorKnown()) continue;
 			actual.setPriority((Const.PRIOR_GRID_MIN + getGridLvlForSector(actual)*Const.PRIORITY_DIFF) );
-			if (actual.isEnemyShip()) System.err.println("enemy ship at: x"+ actual.getXPos() + " y" + actual.getYPos());
 		}
 	}
 
@@ -145,12 +142,12 @@ public class Strategies {
 		return 0;
 	}
 
-	private static List<Sector> getSectorsByState(State findState, boolean findingPriority) {
+	private static List<Sector> getSectorsByState(State findState) {
 		List<Sector> tempList = new ArrayList<Sector>();
 		SectorIterator iterator = new SectorIterator(status);
 		Sector actual;
 		while ((actual = iterator.nextSector()) != null) {
-			if ((findingPriority ? actual.getPriority() : actual.getState()) == findState) {
+			if (actual.getState() == findState) {
 				tempList.add(actual);
 			}
 		}
