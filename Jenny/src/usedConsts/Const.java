@@ -16,11 +16,13 @@ public interface Const {
 	public static final int NOISE_CHANCE = 15;
 	
 	public static final int[][] NEIGHBORS_LINEAR = { {0, -1}, {0, 1}, { -1, 0}, {1, 0} };
-	public static final int[][] NEIGHBORS_LINEAR_STEP = { {0, -2}, {0, 2}, {-2, 0}, {2, 0} };
+//	public static final int[][] NEIGHBORS_LINEAR_STEP = { {0, -2}, {0, 2}, {-2, 0}, {2, 0} };
 	public static final int[][] NEIGHBORS_DIAGONAL = { {1, -1}, {1, 1}, {-1, 1}, {-1, -1} };
 	public static final int[][] NEIGHBORS_ARROUND = { {0, -1}, {0, 1}, { -1, 0}, {1, 0}, {1, -1}, {1, 1}, {-1, 1}, {-1, -1} };
+	public static final int[][] NEIGHBORS_ARROUND_NEXT = { {2,-1}, {2,0}, {2,1}, {2,2}, {1,2}, {0,2}, {-1,2}, {-2,2}, {-2,1}, {-2,0}, {-2,-1}, {-2,-2}, {-1,-2}, {0,-2}, {1,-2}, {2,-2} };
 	public static final int[][] NEIGHBORS_BOMB = { {0, 0}, {1, 0}, {0, 1}, {1, 1} };
 	public static final int[][] NEIGHBORS_BACKWARD = { {0, -1}, {-1, 0} };
+	public static final int[][] NEIGHBORS_LASTTHREE = { {-1,0}, {-2,0}, {-3,0}, {0,-1}, {0,-2}, {0,-3} };
 	
 	
 	public static final char ACTION_SHOT = 'm';

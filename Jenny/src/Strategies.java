@@ -8,94 +8,100 @@ import usedConsts.StatusConsts;
 
 public class Strategies {
 
-	private static ActualStatus status;
 
-	public static void doSomeLogic(ActualStatus stats) {
-		status = stats;
+	public static void doSomeLogic() {
 		Sector actionSector;
 
 		setEnemyShips();
 		setGridPriorities();  //gridMin - gridMin+5*gridDiff
 
 		actionSector = getRandomSectorByPriority();
-		status.executeAction(actionSector);
+		ActualStatus.executeAction(actionSector);
 	}
 
 	private static void setEnemyShips() {
-		List<Sector> enemyShips = getSectorsByState(State.ENEMY_SUNK);
+		List<Sector> enemySectors = getSectorsByState(State.ENEMY_SUNK);
 		List<Sector> neighbors;
-		for (Sector sunken: enemyShips) {
-			status.addShip(sunken);
-			//basic finding
-		}
-		
-		for (Sector sunken: enemyShips) {
-			neighbors = status.getNeighbors(sunken, Const.NEIGHBORS_LINEAR);
+		for (Sector sunken: enemySectors) {  //find borders of sector
+			
+			EnemyShip actualShip = ActualStatus.addShip(sunken);
+			
+			neighbors = ActualStatus.getNeighbors(sunken, Const.NEIGHBORS_LINEAR);
 			for (Sector neighbor: neighbors) {
 				switch (neighbor.getState()) {
-				case OUR_SHOT:
-				case ENEMY_SHOT:
-				case BLANK:
-				case SOME_SHOT: //luck proof
+				case SOME_SHOT: //luck proof (log bad loaded)
+					System.err.println("Found SOME_SHOT at x" + neighbor.getXPos() + " y" + neighbor.getYPos());
+					break;
+				case ALLY_SHIP:
+				case ALLY_SUNK:
+					System.err.println("Error in loaded status - ally ship neighbor of enemy ship at x" + sunken.getXPos() + " y" + sunken.getYPos());
+					break;
+				case ENEMY_SUNK:
+				case UNKNOWN:
+					break;
+				default:
 					for (int i = -1; i<=1; i+=2) {
-						Sector temp = status.getSector(
+						Sector temp = ActualStatus.getSector(
 								(neighbor.getXPos() - sunken.getXPos()) == 0 ? (sunken.getXPos() + i) : neighbor.getXPos(), 
 										(neighbor.getYPos() - sunken.getYPos()) == 0 ? (sunken.getYPos() + i) : neighbor.getYPos() 
 								); //sektor kolmo na sunken a neighbor
 						if (temp != null) ActualStatus.makeBlank(temp);
 					}
-					break;
-				default:
+					//set borders
+					switch (neighbor.getXPos() - sunken.getXPos()) {
+					case -1:
+						actualShip.borderWest(neighbor);
+						break;
+					case 0:
+						switch (neighbor.getYPos() - sunken.getYPos()) {
+						case -1:
+							actualShip.borderNorth(neighbor);
+							break;
+						case 1:
+							actualShip.borderSouth(neighbor);
+							break;
+						default: System.err.println("Error while finding neighbor");
+						}
+					case 1:
+						actualShip.borderEast(neighbor);
+						break;
+					default: System.err.println("Error while finding neighbor");
+					}
+					if ((neighbor.getXPos() - sunken.getXPos()) == 0)
 					break;
 				}
 			}
 			//advanced finding (neighbor one step away)
 		}
 	}
-
+	
 	public void calculateHeuristics()
 	{
 		Sector currSector;
-		SectorIterator iterator = new SectorIterator(status);
+		SectorIterator iterator = new SectorIterator();
 		while ((currSector = iterator.nextSector()) != null) {
 			/*there's no point in calculating it over and over again
 			 * if we know it's a bad location to do an air strike*/
 			if(currSector.getHeurValue()<StatusConsts.HEUR_THRESHOLD){
 				currSector.setHeurValue(
-						calculateSectorHeuristics(currSector.getXPos(),currSector.getXPos()));
+						calculateSectorHeuristics(currSector,Const.NEIGHBORS_ARROUND_NEXT));
 			}			
 		}
 	}
-	private int calculateSectorHeuristics(int x, int y)
+	private int calculateSectorHeuristics(Sector sector, int[][] neighborsRelative)
 	{
-		int value;
 		int retval=0;
-		for(int xAxis=(x-StatusConsts.HEUR_OFFSET);
-				xAxis<(x+StatusConsts.HEUR_OFFSET);
-				xAxis++){
-			for(int yAxis=y-StatusConsts.HEUR_OFFSET;
-					yAxis<(y+StatusConsts.HEUR_OFFSET);
-					yAxis++){
-				if(retval>StatusConsts.HEUR_THRESHOLD)
-				{
-					return retval;
-				}
-				try{
-					value=status.getSector(xAxis, yAxis).getSpecialValue();
-				}
-				catch(ArrayIndexOutOfBoundsException ex)
-				{
-					value=100;
-				}
-				retval+=value;
-			}
+		List<Sector> neighbors = ActualStatus.getNeighbors(sector, neighborsRelative);
+		for (Sector neighbor: neighbors) {
+			if (retval>=StatusConsts.HEUR_THRESHOLD) return retval;
+			retval += neighbor.getSpecialValue();
 		}
 		return retval;
 	}
 
 	
 	private static void setGridPriorities() {
-		SectorIterator iterator = new SectorIterator(status);
+		SectorIterator iterator = new SectorIterator();
 		Sector actual;
 		while((actual = iterator.nextSector()) != null) {
 			if (actual.isSectorKnown()) continue;
@@ -104,9 +110,12 @@ public class Strategies {
 	}
 
 	public static int getGridLvlForSector(Sector sector) {
-		if (status.getGrid() == 3) {
-			int xDiff = sector.getXPos()%3;
-			int yDiff = sector.getYPos()%3;
+		int xDiff, yDiff;
+		List<Sector> neighbors;
+		switch (ActualStatus.getGrid()) {
+		case STATIC3:
+			xDiff = sector.getXPos()%3;
+			yDiff = sector.getYPos()%3;
 			if (xDiff == 2 && yDiff == 2) {
 				return 4;
 			} 
@@ -119,10 +128,10 @@ public class Strategies {
 			if ((Math.abs(sector.getXPos()-sector.getYPos()) % 3) == 2) {
 				return 1;
 			}
-		}
-		else if (status.getGrid() == 4) {
-			int xDiff = sector.getXPos()%4;
-			int yDiff = sector.getYPos()%4;
+			break;
+		case STATIC4:
+			xDiff = sector.getXPos()%4;
+			yDiff = sector.getYPos()%4;
 			if (xDiff == 3 && yDiff == 3) {
 				return 5;
 			} 
@@ -138,13 +147,35 @@ public class Strategies {
 			if ((Math.abs(sector.getXPos()-sector.getYPos()) % 4) == 2) {
 				return 1;
 			}
+			break;
+		case EVERY_SECOND:
+			int integer = 0;
+			neighbors = ActualStatus.getNeighbors(sector, Const.NEIGHBORS_LINEAR);
+			for (Sector neighbor: neighbors) {
+				if (neighbor.getState() == State.UNKNOWN) {
+					integer = 1;
+				}
+			}
+			if (integer == 1) {
+				neighbors = ActualStatus.getNeighbors(sector, Const.NEIGHBORS_LASTTHREE);
+				for (Sector neighbor: neighbors) {
+					if ((integer == 1) && (neighbor.getPriority() < (Const.PRIOR_GRID_MIN + (2*Const.PRIORITY_DIFF))) ) {
+						
+						switch (neighbor.getState()) {
+						case UNKNOWN: break;
+						default: integer++;
+						}
+					}
+				}
+			}
+			return integer;
 		}
 		return 0;
 	}
 
 	private static List<Sector> getSectorsByState(State findState) {
 		List<Sector> tempList = new ArrayList<Sector>();
-		SectorIterator iterator = new SectorIterator(status);
+		SectorIterator iterator = new SectorIterator();
 		Sector actual;
 		while ((actual = iterator.nextSector()) != null) {
 			if (actual.getState() == findState) {
@@ -157,10 +188,10 @@ public class Strategies {
 	private static Sector getRandomSectorByPriority() {
 		List<Sector> highest = new ArrayList<Sector>();
 		List<Sector> noise = new ArrayList<Sector>();
-		SectorIterator iterator = new SectorIterator(status);
+		SectorIterator iterator = new SectorIterator();
 		Sector actual;
-		int priorMax = 0;
-		int priorNoise = 0;
+		int priorMax = Const.PRIORITY_BLANK;
+		int priorNoise = Const.PRIORITY_BLANK;
 		while ((actual = iterator.nextSector()) != null) {
 			if (actual.getPriority() >= priorMax && actual.getState() == State.UNKNOWN) {
 				if (actual.getPriority() > priorMax) { highest.clear(); priorMax = actual.getPriority(); System.err.println("High reseted"); }
@@ -182,7 +213,7 @@ public class Strategies {
 	 */
 	public static List<Sector> getHighestSectors() {
 		List<Sector> tempList = new ArrayList<Sector>();
-		SectorIterator iterator = new SectorIterator(status);
+		SectorIterator iterator = new SectorIterator();
 		Sector actual;
 		int priorMax = 0;
 		while ((actual = iterator.nextSector()) != null) {
@@ -196,7 +227,7 @@ public class Strategies {
 
 	private static Sector selectRandomFromList(List<Sector> shotSectors) {
 		Random rnd = new Random();
-		if (Const.DEBUG) for (Sector x: shotSectors) System.err.println("ROUND " + status.getRound() + " Selecting from x" + x.getXPos() + " y" + x.getYPos());
+		if (Const.DEBUG) for (Sector x: shotSectors) System.err.println("ROUND " + ActualStatus.getRound() + " Selecting from x" + x.getXPos() + " y" + x.getYPos());
 		return shotSectors.get( rnd.nextInt(shotSectors.size()) );
 	}
 

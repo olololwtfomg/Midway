@@ -90,7 +90,7 @@ public class Sector {
 		{
 		// TODO: heuristicke hodnoty pre jednotlive polia
 			case ALLY_SHIP:
-			case ALLY_SUNK: 
+			case ALLY_SUNK:
 				retval=Heuristic.OWN_SHIP; break;
 //			case ENEMY_SHIP: retval=Heuristic.ENEMY_SHIP; break;
 			case SOME_SHOT: 
@@ -100,6 +100,7 @@ public class Sector {
 			case ENEMY_SUNK: 
 				retval=Heuristic.HIT; break;
 			case BLANK:
+				retval=Heuristic.BLANK; break;
 			case UNKNOWN:
 			default:
 				retval=Heuristic.UNKNOWN;
