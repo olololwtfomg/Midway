@@ -276,7 +276,7 @@ public class Jenny implements Constants{
 				splitLine = currentLine.split("[^0-9]+");
 				ActualStatus.side = Integer.parseInt(splitLine[0]);
 				ActualStatus.roundsToEnd = Integer.parseInt(splitLine[1]);
-				ActualStatus.round = 149 - ActualStatus.roundsToEnd;
+				ActualStatus.round = 151 - ActualStatus.roundsToEnd;
 				ActualStatus.specialShots = Integer.parseInt(splitLine[2]);
 			}
 			int battlefieldRow = 0;
