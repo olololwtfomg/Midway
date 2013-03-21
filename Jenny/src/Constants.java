@@ -1,9 +1,14 @@
-package usedConsts;
 
-public interface Const {
+public interface Constants {
+	
 	public static final boolean DEBUG = true;
 	public static final boolean HARD_DEBUG = false;
+	public static final boolean TIMER = true;
+	//StatusConstants
 	
+	public static final int SECTOR_SIZE=14;
+
+	//Priority Constants
 	public static final int PRIORITY_BLANK = 0;
 	public static final int PRIOR_NEXT_SHOT = 80;
 	public static final int PRIOR_DEFAULT = 5;
@@ -34,5 +39,15 @@ public interface Const {
 	public static final char TORPEDO_RIGHT = 'r';
 	public static final char TORPEDO_DOWN = 'd';
 	public static final char TORPEDO_LEFT = 'l';
-    
+
+	//Heuristics
+	public static final int OWN_SHIP=100; //this is a very bad situation
+	public static final int BLANK = 100;
+	public static final int MISSED=20;
+	public static final int HIT=MISSED+10;		
+	public static final int UNKNOWN=0;
+	public static final int HEUR_OFFSET=2; 
+	public static final int HEUR_THRESHOLD=OWN_SHIP;
+
+	
 }

@@ -1,10 +1,8 @@
 import java.util.ArrayList;
 import java.util.List;
 
-import usedConsts.Const;
-import usedConsts.Heuristic;
 
-public class Sector {
+public class Sector implements Constants{
 	/*
 	 * TODO: hodnoty podla pravdepodobnostneho modelu
 	 * */
@@ -17,7 +15,7 @@ public class Sector {
 	/**
 	 * shot, bomb, torpedo, firework
 	 */
-	private int[] priorities = new int[] { Const.PRIOR_DEFAULT, 0, 0, 0 };
+	private int[] priorities = new int[] { PRIOR_DEFAULT, 0, 0, 0 };
 	private char torpedoDir;
 	//priority for known sectors only for firework and torpedo
 	
@@ -25,7 +23,7 @@ public class Sector {
 
 	public Sector(State state, int x, int y) {
 		this.state = state;
-		if (state != State.UNKNOWN) this.priorities[0] = Const.PRIORITY_BLANK;
+		if (state != State.UNKNOWN) this.priorities[0] = PRIORITY_BLANK;
 		this.xPos = x;
 		this.yPos = y;
 	}
@@ -91,19 +89,19 @@ public class Sector {
 		// TODO: heuristicke hodnoty pre jednotlive polia
 			case ALLY_SHIP:
 			case ALLY_SUNK:
-				retval=Heuristic.OWN_SHIP; break;
+				retval=OWN_SHIP; break;
 //			case ENEMY_SHIP: retval=Heuristic.ENEMY_SHIP; break;
 			case SOME_SHOT: 
 			case ENEMY_SHOT: 
 			case OUR_SHOT: 
-				retval=Heuristic.MISSED; break; 
+				retval=MISSED; break; 
 			case ENEMY_SUNK: 
-				retval=Heuristic.HIT; break;
+				retval=HIT; break;
 			case BLANK:
-				retval=Heuristic.BLANK; break;
+				retval=BLANK; break;
 			case UNKNOWN:
 			default:
-				retval=Heuristic.UNKNOWN;
+				retval=UNKNOWN;
 		}
 		return retval;
 	}

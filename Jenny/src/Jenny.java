@@ -6,10 +6,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import usedConsts.Const;
-import usedConsts.StatusConsts;
 
-public class Jenny {
+public class Jenny implements Constants{
 	private static final String INPUT_FILE = "battlefield.txt";
 	private static final String LOG_FILE = "log.txt";
 	//private static final String WIN_PATH_SEP = "\\";
@@ -71,7 +69,7 @@ public class Jenny {
 				SectorIterator iterator = new SectorIterator();
 				while ((actual = iterator.nextSector()) != null) {
 					if (actual.getState() == State.ALLY_SHIP) {
-						ActualStatus.makeBlank(ActualStatus.getNeighbors(actual, Const.NEIGHBORS_ARROUND));
+						ActualStatus.makeBlank(ActualStatus.getNeighbors(actual, NEIGHBORS_ARROUND));
 					}
 				}
 				return;
@@ -85,13 +83,13 @@ public class Jenny {
 			currentLine = br.readLine(); //last move
 
 			State logState;
-			for (int battlefieldRow = 0; battlefieldRow<StatusConsts.SECTOR_SIZE; battlefieldRow++) {
+			for (int battlefieldRow = 0; battlefieldRow<SECTOR_SIZE; battlefieldRow++) {
 				currentLine = br.readLine();
 				if (currentLine == null) {
 					System.err.println("Error while reading log");
 					return;
 				}
-				for (int column = 0; column< currentLine.length() && column<StatusConsts.SECTOR_SIZE; column++) { //prechod riadkom po znakoch/sectoroch
+				for (int column = 0; column< currentLine.length() && column<SECTOR_SIZE; column++) { //prechod riadkom po znakoch/sectoroch
 					logState = State.getState(currentLine.charAt(column));
 					
 					//set priorities for unknowns
@@ -126,7 +124,7 @@ public class Jenny {
 	private static void compareInputVSLog(Sector sector, State logState) {
 		State systemState = sector.getState(); //status from actual input
 		if (systemState == State.ALLY_SHIP) {  //its ally ship there
-			ActualStatus.makeBlank(ActualStatus.getNeighbors(sector, Const.NEIGHBORS_ARROUND));
+			ActualStatus.makeBlank(ActualStatus.getNeighbors(sector, NEIGHBORS_ARROUND));
 		} else if (systemState == State.SOME_SHOT) {  //someone shot, no hit
 			switch (logState) {  //before:
 			case BLANK:
@@ -151,7 +149,7 @@ public class Jenny {
 			switch (logState) {
 			case UNKNOWN:  //something destroyed enemy ship (special bomb/enemy)
 			case OUR_SHOT:  //last shot succeded - continue in shoting around
-				ActualStatus.makeNextShot(ActualStatus.getNeighbors(sector, Const.NEIGHBORS_LINEAR) );
+				ActualStatus.makeNextShot(ActualStatus.getNeighbors(sector, NEIGHBORS_LINEAR) );
 				break;
 			case BLANK:
 				break;
@@ -165,13 +163,13 @@ public class Jenny {
 			case ALLY_SUNK:
 			case OUR_SHOT:
 			case ENEMY_SHOT:
-				if (Const.DEBUG) {  //only for offline version
+				if (DEBUG) {  //only for offline version
 					sector.setState(logState);
 				}
 				break;
 			case BLANK:
 				sector.setState(logState);
-				sector.setPriority(Const.PRIORITY_BLANK);
+				sector.setPriority(PRIORITY_BLANK);
 			default: break;
 			}
 		}
@@ -213,7 +211,7 @@ public class Jenny {
 			while ((actual = iterator.nextSector()) != null) {
 				switch (actual.getState()) {
 				case UNKNOWN:
-					if (Const.HARD_DEBUG) System.err.println("Saving priority for x" + actual.getXPos() + " y" + actual.getYPos() + " as " + actual.getPriority());
+					if (HARD_DEBUG) System.err.println("Saving priority for x" + actual.getXPos() + " y" + actual.getYPos() + " as " + actual.getPriority());
 					prioritiesLine.append(actual.getPriority() + " ");
 				default:
 					break;
@@ -228,9 +226,9 @@ public class Jenny {
 			bw.write(ActualStatus.getActionWord()); //last shot
 			bw.newLine();
 			StringBuffer currLine = null;
-			for (int row = 0; row<StatusConsts.SECTOR_SIZE; row++) {
+			for (int row = 0; row<SECTOR_SIZE; row++) {
 				currLine = new StringBuffer();				
-				for (int column = 0; column<StatusConsts.SECTOR_SIZE; column++) {
+				for (int column = 0; column<SECTOR_SIZE; column++) {
 					currLine.append(ActualStatus.getSector(column, row).getState().getLogValue());
 				}
 				bw.write(currLine.toString());
@@ -317,8 +315,8 @@ public class Jenny {
 		ActualStatus.side = 1;
 		ActualStatus.roundsToEnd = 150;
 		ActualStatus.specialShots = 0;
-		for (int row = 0; row<StatusConsts.SECTOR_SIZE;row++) {
-			for (int column = 0; column<StatusConsts.SECTOR_SIZE; column++) {
+		for (int row = 0; row<SECTOR_SIZE;row++) {
+			for (int column = 0; column<SECTOR_SIZE; column++) {
 				ActualStatus.setSector(State.UNKNOWN, column, row);
 			}
 		}

@@ -2,11 +2,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import usedConsts.Const;
-import usedConsts.StatusConsts;
-
-
-public class Strategies {
+public class Strategies implements Constants{
 
 
 	public static void doSomeLogic() {
@@ -26,7 +22,7 @@ public class Strategies {
 			
 			EnemyShip actualShip = ActualStatus.addShip(sunken);
 			
-			neighbors = ActualStatus.getNeighbors(sunken, Const.NEIGHBORS_LINEAR);
+			neighbors = ActualStatus.getNeighbors(sunken, NEIGHBORS_LINEAR);
 			for (Sector neighbor: neighbors) {
 				switch (neighbor.getState()) {
 				case SOME_SHOT: //luck proof (log bad loaded)
@@ -82,9 +78,9 @@ public class Strategies {
 		while ((currSector = iterator.nextSector()) != null) {
 			/*there's no point in calculating it over and over again
 			 * if we know it's a bad location to do an air strike*/
-			if(currSector.getHeurValue()<StatusConsts.HEUR_THRESHOLD){
+			if(currSector.getHeurValue()<HEUR_THRESHOLD){
 				currSector.setHeurValue(
-						calculateSectorHeuristics(currSector,Const.NEIGHBORS_ARROUND_NEXT));
+						calculateSectorHeuristics(currSector,NEIGHBORS_ARROUND_NEXT));
 			}			
 		}
 	}
@@ -93,7 +89,7 @@ public class Strategies {
 		int retval=0;
 		List<Sector> neighbors = ActualStatus.getNeighbors(sector, neighborsRelative);
 		for (Sector neighbor: neighbors) {
-			if (retval>=StatusConsts.HEUR_THRESHOLD) return retval;
+			if (retval>=HEUR_THRESHOLD) return retval;
 			retval += neighbor.getSpecialValue();
 		}
 		return retval;
@@ -105,7 +101,7 @@ public class Strategies {
 		Sector actual;
 		while((actual = iterator.nextSector()) != null) {
 			if (actual.isSectorKnown()) continue;
-			actual.setPriority((Const.PRIOR_GRID_MIN + getGridLvlForSector(actual)*Const.PRIORITY_DIFF) );
+			actual.setPriority((PRIOR_GRID_MIN + getGridLvlForSector(actual)*PRIORITY_DIFF) );
 		}
 	}
 
@@ -150,16 +146,16 @@ public class Strategies {
 			break;
 		case EVERY_SECOND:
 			int integer = 0;
-			neighbors = ActualStatus.getNeighbors(sector, Const.NEIGHBORS_LINEAR);
+			neighbors = ActualStatus.getNeighbors(sector, NEIGHBORS_LINEAR);
 			for (Sector neighbor: neighbors) {
 				if (neighbor.getState() == State.UNKNOWN) {
 					integer = 1;
 				}
 			}
 			if (integer == 1) {
-				neighbors = ActualStatus.getNeighbors(sector, Const.NEIGHBORS_LASTTHREE);
+				neighbors = ActualStatus.getNeighbors(sector, NEIGHBORS_LASTTHREE);
 				for (Sector neighbor: neighbors) {
-					if ((integer == 1) && (neighbor.getPriority() < (Const.PRIOR_GRID_MIN + (2*Const.PRIORITY_DIFF))) ) {
+					if ((integer == 1) && (neighbor.getPriority() < (PRIOR_GRID_MIN + (2*PRIORITY_DIFF))) ) {
 						
 						switch (neighbor.getState()) {
 						case UNKNOWN: break;
@@ -190,8 +186,8 @@ public class Strategies {
 		List<Sector> noise = new ArrayList<Sector>();
 		SectorIterator iterator = new SectorIterator();
 		Sector actual;
-		int priorMax = Const.PRIORITY_BLANK;
-		int priorNoise = Const.PRIORITY_BLANK;
+		int priorMax = PRIORITY_BLANK;
+		int priorNoise = PRIORITY_BLANK;
 		while ((actual = iterator.nextSector()) != null) {
 			if (actual.getPriority() >= priorMax && actual.getState() == State.UNKNOWN) {
 				if (actual.getPriority() > priorMax) { highest.clear(); priorMax = actual.getPriority(); System.err.println("High reseted"); }
@@ -205,7 +201,7 @@ public class Strategies {
 				noise.add(actual);
 			}
 		}
-		return selectRandomFromList(( (new Random().nextInt(100)) >= Const.NOISE_CHANCE) ? highest : noise);
+		return selectRandomFromList(( (new Random().nextInt(100)) >= NOISE_CHANCE) ? highest : noise);
 	}
 
 	/**
@@ -227,7 +223,7 @@ public class Strategies {
 
 	private static Sector selectRandomFromList(List<Sector> shotSectors) {
 		Random rnd = new Random();
-		if (Const.DEBUG) for (Sector x: shotSectors) System.err.println("ROUND " + ActualStatus.getRound() + " Selecting from x" + x.getXPos() + " y" + x.getYPos());
+		if (DEBUG) for (Sector x: shotSectors) System.err.println("ROUND " + ActualStatus.getRound() + " Selecting from x" + x.getXPos() + " y" + x.getYPos());
 		return shotSectors.get( rnd.nextInt(shotSectors.size()) );
 	}
 

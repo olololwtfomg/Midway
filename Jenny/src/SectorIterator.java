@@ -1,7 +1,6 @@
-import usedConsts.StatusConsts;
 
 
-public class SectorIterator {
+public class SectorIterator implements Constants{
 	
 	private int iteratorIndex = 0;
 	
@@ -13,12 +12,12 @@ public class SectorIterator {
 	}
 	
 	public boolean hasNext() {
-		return iteratorIndex < (StatusConsts.SECTOR_SIZE * StatusConsts.SECTOR_SIZE);
+		return iteratorIndex < (SECTOR_SIZE * SECTOR_SIZE);
 	}
 	
 	public Sector nextSector() {
-		if (iteratorIndex < (StatusConsts.SECTOR_SIZE * StatusConsts.SECTOR_SIZE) ) {
-			return ActualStatus.getSector(iteratorIndex % StatusConsts.SECTOR_SIZE, (int) (iteratorIndex++ / StatusConsts.SECTOR_SIZE));
+		if (iteratorIndex < (SECTOR_SIZE * SECTOR_SIZE) ) {
+			return ActualStatus.getSector(iteratorIndex % SECTOR_SIZE, (int) (iteratorIndex++ / SECTOR_SIZE));
 		} else return null;
 	}
 }

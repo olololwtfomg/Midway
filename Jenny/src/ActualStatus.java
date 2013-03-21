@@ -1,10 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 
-import usedConsts.Const;
-import usedConsts.StatusConsts;
-
-public class ActualStatus {
+public class ActualStatus implements Constants {
 	
 	enum Grid {
 		STATIC3, STATIC4, EVERY_SECOND
@@ -19,7 +16,7 @@ public class ActualStatus {
 	private static String lastAction;
 	
 	private static Sector[][] battlefield = 
-			new Sector[StatusConsts.SECTOR_SIZE][StatusConsts.SECTOR_SIZE];
+			new Sector[SECTOR_SIZE][SECTOR_SIZE];
 	protected static List<EnemyShip> enemyShipsList = new ArrayList<EnemyShip>();
 	public static EnemyShip[] enemyShipsComplete = new EnemyShip[7];
 	
@@ -84,17 +81,17 @@ public class ActualStatus {
 
 	public static int[] findAirstrikePos(){
 		int PosBest[]= {15,15};
-		int best=StatusConsts.HEUR_THRESHOLD+1;
+		int best=HEUR_THRESHOLD+1;
 		int currHeurValue;
 
-		for(int xAxis=StatusConsts.HEUR_OFFSET;
-				xAxis<(StatusConsts.SECTOR_SIZE-StatusConsts.HEUR_OFFSET);
+		for(int xAxis=HEUR_OFFSET;
+				xAxis<(SECTOR_SIZE-HEUR_OFFSET);
 				xAxis++){
-			for(int yAxis=StatusConsts.HEUR_OFFSET;
-					yAxis<(StatusConsts.SECTOR_SIZE-StatusConsts.HEUR_OFFSET);
+			for(int yAxis=HEUR_OFFSET;
+					yAxis<(SECTOR_SIZE-HEUR_OFFSET);
 					yAxis++){
 				currHeurValue=battlefield[xAxis][yAxis].getHeurValue();
-				if(currHeurValue<=StatusConsts.HEUR_THRESHOLD)
+				if(currHeurValue<=HEUR_THRESHOLD)
 				{
 					if(currHeurValue<best)
 					{
@@ -127,7 +124,7 @@ public class ActualStatus {
 		for (int[] pos : neighborsRelative) {
 			int x = pos[0] + home.getXPos();
 			int y = pos[1] + home.getYPos();
-			if (x < StatusConsts.SECTOR_SIZE && x >= 0 && y < StatusConsts.SECTOR_SIZE && y >= 0) {
+			if (x < SECTOR_SIZE && x >= 0 && y < SECTOR_SIZE && y >= 0) {
 				list.add(getSector(x, y));
 			}
 		}
@@ -138,8 +135,8 @@ public class ActualStatus {
 		if (list == null) return;
 		for (Sector actual: list) {
 			if (actual.getState() == State.UNKNOWN) {
-				if (Const.HARD_DEBUG) System.err.println("Sector x" + actual.getXPos() + " y" + actual.getYPos() + " as next shot now.");
-				actual.setPriority(Const.PRIOR_NEXT_SHOT);
+				if (HARD_DEBUG) System.err.println("Sector x" + actual.getXPos() + " y" + actual.getYPos() + " as next shot now.");
+				actual.setPriority(PRIOR_NEXT_SHOT);
 			}
 		}	
 	}
@@ -147,9 +144,9 @@ public class ActualStatus {
 	public static void makeBlank(Sector sector) {
 		if (sector == null) return;		
 		if (sector.getState() == State.UNKNOWN) {
-			if (Const.HARD_DEBUG) System.err.println("Sector x" + sector.getXPos() + " y" + sector.getYPos() + " last condition: " + sector.getState() + " as blank now.");
+			if (HARD_DEBUG) System.err.println("Sector x" + sector.getXPos() + " y" + sector.getYPos() + " last condition: " + sector.getState() + " as blank now.");
 			sector.setState(State.BLANK);
-			sector.setPriority(Const.PRIORITY_BLANK);
+			sector.setPriority(PRIORITY_BLANK);
 		}
 	}
 	
@@ -164,7 +161,7 @@ public class ActualStatus {
 		if (list == null) return;
 		for (Sector actual: list) {
 			if (actual.getState() == State.UNKNOWN) {
-				if (Const.DEBUG) System.err.println("Shooting at x" + actual.getXPos() + " y" + actual.getYPos() + " last condition: " + actual.getState() + ".");
+				if (DEBUG) System.err.println("Shooting at x" + actual.getXPos() + " y" + actual.getYPos() + " last condition: " + actual.getState() + ".");
 				actual.setState(State.OUR_SHOT);
 			}
 		}
@@ -197,7 +194,7 @@ public class ActualStatus {
 	}
 	
 	public static EnemyShip addShip(Sector sector) {
-		List<Sector> neighbors = getNeighbors(sector, Const.NEIGHBORS_BACKWARD);
+		List<Sector> neighbors = getNeighbors(sector, NEIGHBORS_BACKWARD);
 		EnemyShip newShip = null;
 		for (Sector neighbor: neighbors) {
 			if (neighbor.getState() == State.ENEMY_SUNK) {
@@ -213,7 +210,7 @@ public class ActualStatus {
 			newShip = new EnemyShip(sector);
 			enemyShipsList.add(newShip);
 		}
-		if (Const.HARD_DEBUG) System.err.println("adding ship at x" + sector.getXPos() + " y" + sector.getYPos());
+		if (HARD_DEBUG) System.err.println("adding ship at x" + sector.getXPos() + " y" + sector.getYPos());
 		return newShip;
 	}
 	
@@ -240,18 +237,18 @@ public class ActualStatus {
 
 	public static boolean executeAction(Sector sector) {
 		switch (sector.getAction()) {
-		case Const.ACTION_BOMB:
+		case ACTION_BOMB:
 			if (specialShots==0) return false;
-			shotAll(getNeighbors(sector, Const.NEIGHBORS_BOMB));
+			shotAll(getNeighbors(sector, NEIGHBORS_BOMB));
 			lastAction = String.format("%c %d %d", sector.getAction(), sector.getXPos(), sector.getYPos());
 			return true;
-		case Const.ACTION_SHOT:
+		case ACTION_SHOT:
 			sector.shot();
 			lastAction = String.format("%c %d %d", sector.getAction(), sector.getXPos(), sector.getYPos());
 			return true;
-		case Const.ACTION_TORPEDO:
+		case ACTION_TORPEDO:
 			if (specialShots==0) return false;
-		case Const.ACTION_FIREWORK:
+		case ACTION_FIREWORK:
 			
 			if (specialShots==0) return false;
 		default:
@@ -272,11 +269,11 @@ public class ActualStatus {
 
 	public static void print_heuristics()
 	{
-		for(int xAxis=StatusConsts.HEUR_OFFSET;
-				xAxis<(StatusConsts.SECTOR_SIZE-StatusConsts.HEUR_OFFSET);
+		for(int xAxis=HEUR_OFFSET;
+				xAxis<(SECTOR_SIZE-HEUR_OFFSET);
 				xAxis++){
-			for(int yAxis=StatusConsts.HEUR_OFFSET;
-					yAxis<(StatusConsts.SECTOR_SIZE-StatusConsts.HEUR_OFFSET);
+			for(int yAxis=HEUR_OFFSET;
+					yAxis<(SECTOR_SIZE-HEUR_OFFSET);
 					yAxis++){
 				System.out.printf("%4d",battlefield[xAxis][yAxis].getHeurValue());
 			}
